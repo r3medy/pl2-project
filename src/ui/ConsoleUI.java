@@ -63,16 +63,17 @@ public class ConsoleUI {
         this.displayMenu(titles, actions, subMenuTitles, subMenuActions);
     }
 
-    public void displayMainMenu() {}
     public void displayProductsMenu() {}
+
     public void displaySalesMenu() {}
+
     public void displayReportsMenu() {}
+    
     public void exit() {
         System.exit(0);
     }
+    
 
-    // Not In-Class-diagram
-    public void displayLoginMenu() {}
     private void displayMenu(String[] titles, Runnable[] actions, String[][] subMenuTitles, Runnable[][] subMenuActions) {
         try {
             Terminal terminal = TerminalBuilder.terminal();
@@ -114,22 +115,20 @@ public class ConsoleUI {
                         }
                     }
                 } else if (initialKey == 13 || initialKey == 10) {
-                    // Enter key
                     if (inSubmenu) {
-                        // Run submenu action
                         if (subMenuActions[selectedIdx] != null && subMenuActions[selectedIdx][subMenuSelectedIdx] != null) {
+                            terminal.puts(InfoCmp.Capability.clear_screen);
+                            terminal.writer().flush();
                             subMenuActions[selectedIdx][subMenuSelectedIdx].run();
+                            break;
                         }
-                        // Exit submenu after action
                         inSubmenu = false;
                         subMenuSelectedIdx = 0;
                     } else {
-                        // Check if this item has a submenu
                         if (subMenuTitles != null && subMenuTitles[selectedIdx] != null) {
                             inSubmenu = true;
                             subMenuSelectedIdx = 0;
                         } else if (actions[selectedIdx] != null) {
-                            // No submenu, run the action directly
                             actions[selectedIdx].run();
                         }
                     }
