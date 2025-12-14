@@ -1,0 +1,13 @@
+userId ,role      ,name          ,username     ,password
+     1 ,ADMIN     ,Yousef Adel   ,yousef.admin ,admin123
+     2 ,ADMIN     ,Sara Hassan   ,sara.admin   ,admin123
+     3 ,INVENTORY ,Ahmed Nabil   ,ahmed.inv    ,inv123
+     4 ,INVENTORY ,Mohamed Tarek ,mohamed.inv  ,inv123
+     5 ,INVENTORY ,Lina Fathy    ,lina.inv     ,inv123
+     6 ,MARKETING ,Nour Khaled   ,nour.mkt     ,mkt123
+     7 ,MARKETING ,Omar Saeed    ,omar.mkt     ,mkt123
+     8 ,MARKETING ,Salma Yassin  ,salma.mkt    ,mkt123
+     9 ,SALES     ,Karim Adel    ,karim.sales  ,sales123
+    10 ,SALES     ,Mona Ibrahim  ,mona.sales   ,sales123
+    11 ,SALES     ,Hassan Ali    ,hassan.sales ,sales123
+    12 ,SALES     ,Farah Mahmoud ,farah.sales  ,sales123

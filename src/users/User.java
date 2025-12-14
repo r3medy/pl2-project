@@ -1,5 +1,4 @@
 package users;
-import enums.*;
 
 public abstract class User {
     private static int idCounter = 0;

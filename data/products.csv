@@ -1,0 +1,36 @@
+id ,name                ,category    ,unitPrice ,stockQuantity ,lowStockQuantityThreshold ,type           ,expiryOrWarranty
+ 1 ,Milk 1L             ,FOOD        ,     1.25 ,          120 ,                       20 ,PERISHABLE     ,2025-01-20
+ 2 ,Bread Loaf          ,FOOD        ,     0.95 ,           80 ,                       15 ,PERISHABLE     ,2024-12-18
+ 3 ,Chocolate Bar       ,FOOD        ,     0.75 ,          200 ,                       30 ,PERISHABLE     ,2025-06-01
+ 4 ,Cheese Block        ,FOOD        ,     4.50 ,           40 ,                        8 ,PERISHABLE     ,2025-03-05
+ 5 ,Frozen Pizza        ,FOOD        ,     3.99 ,           65 ,                       10 ,PERISHABLE     ,2025-01-30
+ 6 ,Yogurt Cup          ,FOOD        ,     0.85 ,          140 ,                       25 ,PERISHABLE     ,2024-12-22
+ 7 ,Butter Pack         ,FOOD        ,     2.75 ,           50 ,                       10 ,PERISHABLE     ,2025-04-15
+ 8 ,Apple Pack          ,FOOD        ,     2.60 ,           90 ,                       20 ,PERISHABLE     ,2024-12-28
+ 9 ,Protein Bar         ,FOOD        ,     1.80 ,          160 ,                       30 ,PERISHABLE     ,2025-08-01
+10 ,Cereal Box          ,FOOD        ,     3.15 ,          110 ,                       18 ,PERISHABLE     ,2025-05-10
+11 ,Orange Juice        ,DRINKS      ,     2.10 ,           60 ,                       10 ,PERISHABLE     ,2025-02-10
+12 ,Bottled Water       ,DRINKS      ,     0.60 ,          300 ,                       50 ,NON_PERISHABLE ,12
+13 ,Soft Drink Can      ,DRINKS      ,     1.10 ,          180 ,                       25 ,NON_PERISHABLE ,9
+14 ,Energy Drink        ,DRINKS      ,     2.30 ,           90 ,                       15 ,NON_PERISHABLE ,6
+15 ,Green Tea Box       ,DRINKS      ,     3.40 ,           75 ,                       12 ,NON_PERISHABLE ,18
+16 ,Dish Soap           ,CLEANING    ,     3.20 ,           70 ,                       10 ,NON_PERISHABLE ,24
+17 ,Laundry Detergent   ,CLEANING    ,     8.75 ,           35 ,                        5 ,NON_PERISHABLE ,36
+18 ,All Purpose Cleaner ,CLEANING    ,     4.60 ,           55 ,                        8 ,NON_PERISHABLE ,18
+19 ,Paper Towels        ,CLEANING    ,     5.10 ,          100 ,                       20 ,NON_PERISHABLE ,12
+20 ,Trash Bags          ,CLEANING    ,     6.40 ,           90 ,                       15 ,NON_PERISHABLE ,0
+21 ,Floor Cleaner       ,CLEANING    ,     7.25 ,           40 ,                        6 ,NON_PERISHABLE ,24
+22 ,Hand Sanitizer      ,CLEANING    ,     2.40 ,          130 ,                       25 ,NON_PERISHABLE ,12
+23 ,Smartphone Charger  ,ELECTRONICS ,    12.99 ,           45 ,                        7 ,NON_PERISHABLE ,18
+24 ,USB Cable           ,ELECTRONICS ,     6.50 ,          120 ,                       20 ,NON_PERISHABLE ,12
+25 ,Wireless Mouse      ,ELECTRONICS ,    25.00 ,           30 ,                        5 ,NON_PERISHABLE ,24
+26 ,Laptop Keyboard     ,ELECTRONICS ,    45.90 ,           20 ,                        4 ,NON_PERISHABLE ,36
+27 ,LED Bulb            ,ELECTRONICS ,     4.20 ,          150 ,                       25 ,NON_PERISHABLE ,24
+28 ,Vacuum Cleaner      ,ELECTRONICS ,   120.00 ,            8 ,                        2 ,NON_PERISHABLE ,60
+29 ,HDMI Cable          ,ELECTRONICS ,     9.50 ,           85 ,                       15 ,NON_PERISHABLE ,12
+30 ,Desk Lamp           ,ELECTRONICS ,    22.75 ,           28 ,                        5 ,NON_PERISHABLE ,36
+31 ,Electric Kettle     ,ELECTRONICS ,    39.99 ,           18 ,                        3 ,NON_PERISHABLE ,24
+32 ,Notebook            ,OTHER       ,     2.10 ,          200 ,                       40 ,NON_PERISHABLE ,0
+33 ,Ballpoint Pen       ,OTHER       ,     0.50 ,          500 ,                      100 ,NON_PERISHABLE ,0
+34 ,Office Chair        ,OTHER       ,    89.99 ,           10 ,                        2 ,NON_PERISHABLE ,48
+35 ,Reusable Bottle     ,OTHER       ,    11.20 ,           60 ,                       10 ,NON_PERISHABLE ,0

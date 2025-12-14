@@ -18,7 +18,6 @@ public class FileManager {
         this.productsFilePath = productsFilePath;
         this.salesFilePath = salesFilePath;
     }
-
     
     public boolean saveProducts(List<Product> products) {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(productsFilePath))) {
@@ -27,12 +26,12 @@ public class FileManager {
                     PerishableProduct pp = (PerishableProduct) p;
                     writer.write(p.getProductId() + "," + p.getName() + "," + p.getCategory() + "," +
                                  p.getUnitPrice() + "," + p.getStockQuantity() + "," +
-                                 p.getLowStockQuantityThreshold() + ",Perishable," + pp.getExpiryDate());
+                                 p.getLowStockQuantityThreshold() + ",PERISHABLE," + pp.getExpiryDate());
                 } else if (p instanceof NonPerishableProduct) {
                     NonPerishableProduct np = (NonPerishableProduct) p;
                     writer.write(p.getProductId() + "," + p.getName() + "," + p.getCategory() + "," +
                                  p.getUnitPrice() + "," + p.getStockQuantity() + "," +
-                                 p.getLowStockQuantityThreshold() + ",NonPerishable," + np.getWarrantyMonths());
+                                 p.getLowStockQuantityThreshold() + ",NON_PERISHABLE," + np.getWarrantyMonths());
                 }
                 writer.newLine();
             }
