@@ -34,10 +34,10 @@ public abstract class User {
         System.out.println("User ID     :: " + userId);
         System.out.println("Name        :: " + name);
         System.out.println("Username    :: " + username);
-        System.out.println("User Type   :: " + this.getUserType().name());
+        System.out.println("User Type   :: " + this.getUserType());
     }
 
-    public abstract UserType getUserType();
+    public abstract String getUserType();
 
     // -- Getters
     public int getUserId() { return userId; }
