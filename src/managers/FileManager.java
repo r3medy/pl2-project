@@ -61,7 +61,6 @@ public class FileManager {
     public boolean saveSales(List<Sale> sales) {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(salesFilePath))) {
             for (Sale s : sales) {
-               
                 writer.write(s.getSaleId() + "," + s.getSaleDate() + "," +
                              s.getSubTotal() + "," + s.getDiscountAmount() + "," + s.getTotalAmount());
                 writer.newLine();

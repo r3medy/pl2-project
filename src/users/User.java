@@ -1,6 +1,7 @@
 package users;
 
 public abstract class User {
+    // TODO: make the counter = to the last user id in the database
     private static int idCounter = 0;
     protected int userId;
     protected String name;

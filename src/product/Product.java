@@ -2,6 +2,7 @@ package product;
 import enums.*;
 
 public abstract class Product {
+    // TODO: make the counter = to the last product id in the database
     private static int idCounter = 0;
     private int productId;
     private String name;
