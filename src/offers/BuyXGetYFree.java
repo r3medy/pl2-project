@@ -1,5 +1,7 @@
 package offers;
 
+import enums.*;
+
 public class BuyXGetYFree implements DiscountStrategy {
     private int buyQuantity;
     private int freeQuantity;
@@ -17,7 +19,7 @@ public class BuyXGetYFree implements DiscountStrategy {
     }
 
     @Override
-    public String getDiscountStrategy() {
-        return enums.DiscountStrategy.BUY_X_GET_Y_FREE.name();
+    public DiscountStrategies getDiscountStrategy() {
+        return DiscountStrategies.BUY_X_GET_Y_FREE;
     }
 }

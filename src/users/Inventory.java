@@ -12,7 +12,7 @@ public class Inventory extends User {
     }
 
     @Override
-    public String getUserType() {
-        return UserType.INVENTORY.name();
+    public UserType getUserType() {
+        return UserType.INVENTORY;
     }
 }

@@ -3,11 +3,13 @@ package sales;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import managers.FileManager;
 import offers.*;
+import product.Product;
 
 public class Sale {
-    // TODO: make the counter = to the last sale id in the database
-    private static int idCounter = 0;
+    private static int idCounter;
     private int saleId;
     private LocalDate saleDate;
     private List<SaleItem> items;
@@ -29,6 +31,12 @@ public class Sale {
         if(saleDate == null) throw new IllegalArgumentException("Sale date cannot be null");
         if(items == null) throw new IllegalArgumentException("Items cannot be null");
 
+        List<Sale> existingSales = FileManager.loadSales();
+        Sale.idCounter = existingSales.stream()
+                .mapToInt(Sale::getSaleId)
+                .max()
+                .orElse(0);
+
         this.saleId = saleId;
         this.saleDate = saleDate;
         this.items = items;
@@ -44,13 +52,11 @@ public class Sale {
         return added;
     }
 
-
     public boolean removeSaleItem(SaleItem item) {
         boolean removed = items.remove(item);
         recalcTotals();
         return removed;
     }
-
 
     public boolean removeSaleItemById(int productId) {
         boolean removed = items.removeIf(i -> i.getProduct().getProductId() == productId);
@@ -58,21 +64,17 @@ public class Sale {
         return removed;
     }
 
-
     public String generateReceipt() {
         System.out.println("Sale ID    :: " + saleId);
         System.out.println("Date       :: " + saleDate);
         System.out.println("Items      :: ");
-        for (SaleItem item : items) {
-            System.out.println("    - " + item.getProduct().getName() + " x" + item.getQuantity() + " = " + item.getSaleTotalPrice());
-        }
+        for (SaleItem item : items) System.out.println("    - " + item.getProduct().getName() + " x" + item.getQuantity() + " = " + item.getSaleTotalPrice());
         System.out.println("--------------------------------");
         System.out.println("Subtotal   :: " + subTotal);
         System.out.println("Discount   :: " + discountAmount);
         System.out.println("Total      :: " + totalAmount);
         return "";
     }
-
 
     private void recalcTotals() {
         subTotal = items.stream().mapToDouble(SaleItem::getSaleTotalPrice).sum();
@@ -85,12 +87,38 @@ public class Sale {
     public double getSubTotal() { return subTotal; }
     public double getDiscountAmount() { return discountAmount; }
     public double getTotalAmount() { return totalAmount; }
+    public int getSaleId() { return saleId; }
 
+    
+    public void processSale() {
+        // Decrease stock for all items
+        for(SaleItem item : this.items) {
+            Product p = item.getProduct();
+            int qty = item.getQuantity();
+            p.decreaseStock(qty);
+        }
+        
+        // Save the sale
+        List<Sale> allSales = FileManager.loadSales();
+        boolean found = false;
+        for(int i = 0; i < allSales.size(); i++) {
+            if(allSales.get(i).getSaleId() == this.saleId) {
+                allSales.set(i, this);
+                found = true;
+                break;
+            }
+        }
+        if(!found) allSales.add(this);
+        
+        FileManager.saveSales(allSales);
+        FileManager.saveProducts(FileManager.loadProducts());
+        this.generateReceipt();
+    }
+    
     public void setDiscountStrategy(DiscountStrategy newDiscountStrategy) {
         this.discountStrategy = newDiscountStrategy;
         recalcTotals();
     }
 
-    public int getSaleId() { return saleId; }
     public void setSaleId(int saleId) { this.saleId = saleId; }
 }

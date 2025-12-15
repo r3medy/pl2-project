@@ -1,9 +1,12 @@
 package product;
+import java.util.List;
+
 import enums.*;
+import managers.FileManager;
+import sales.Sale;
 
 public abstract class Product {
-    // TODO: make the counter = to the last product id in the database
-    private static int idCounter = 0;
+    private static int idCounter;
     private int productId;
     private String name;
     private Category category;
@@ -23,6 +26,12 @@ public abstract class Product {
         if(stockQuantity < 0) throw new IllegalArgumentException("Stock quantity cannot be negative");
         if(lowStockQuantityThreshold < 0) throw new IllegalArgumentException("Low stock quantity threshold cannot be negative");
 
+        List<Product> existingProducts = FileManager.loadProducts();
+        Product.idCounter = existingProducts.stream()
+                .mapToInt(Product::getProductId)
+                .max()
+                .orElse(0);
+
         this.productId = productId;
         this.name = name;
         this.category = category;
@@ -31,7 +40,6 @@ public abstract class Product {
         this.lowStockQuantityThreshold = lowStockQuantityThreshold;
     }
 
-    // -- Methods
     public boolean increaseStock(int increment) {
         if(increment <= 0) return false;
         stockQuantity += increment;
@@ -62,7 +70,6 @@ public abstract class Product {
             : "Warranty Months :: " + ((NonPerishableProduct)this).getWarrantyMonths());
     }
 
-    // -- Getters
     public int getProductId() { return productId; }
     public String getName() { return name; }
     public double getUnitPrice() { return unitPrice; }
@@ -71,7 +78,6 @@ public abstract class Product {
     public int getLowStockQuantityThreshold() { return lowStockQuantityThreshold; }
     public abstract String getProductType();
 
-    // -- Setters
     public void setName(String name) {
         if(name == null || name.trim().isEmpty()) throw new IllegalArgumentException("Product name cannot be empty");
         this.name = name;

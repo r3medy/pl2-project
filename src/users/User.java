@@ -1,8 +1,11 @@
 package users;
+import java.util.List;
+
+import enums.*;
+import managers.FileManager;
 
 public abstract class User {
-    // TODO: make the counter = to the last user id in the database
-    private static int idCounter = 0;
+    private static int idCounter;
     protected int userId;
     protected String name;
     protected String username;
@@ -14,6 +17,12 @@ public abstract class User {
         if(username == null || username.trim().isEmpty()) throw new IllegalArgumentException("Username cannot be empty");
         if(password == null || password.trim().isEmpty()) throw new IllegalArgumentException("Password cannot be empty");
 
+        List<User> existingUsers = FileManager.loadUsers();
+        User.idCounter = existingUsers.stream()
+                .mapToInt(User::getUserId)
+                .max()
+                .orElse(0);
+
         this.userId = userId;
         this.name = name;
         this.username = username;
@@ -24,7 +33,6 @@ public abstract class User {
         this(++idCounter, name, username, password);
     }
 
-    // -- Methods
     public boolean verifyPassword(String inputPassword) {
         if(inputPassword == null || inputPassword.trim().isEmpty()) throw new IllegalArgumentException("Password cannot be empty");
         return this.password.equals(inputPassword);
@@ -37,14 +45,13 @@ public abstract class User {
         System.out.println("User Type   :: " + this.getUserType());
     }
 
-    public abstract String getUserType();
+    public abstract UserType getUserType();
 
-    // -- Getters
     public int getUserId() { return userId; }
     public String getName() { return name; }
     public String getUsername() { return username; }
+    public String getPassword() { return password; }
 
-    // -- Setters
     public void setName(String name) {
         if(name == null || name.trim().isEmpty()) throw new IllegalArgumentException("Name cannot be empty");
         this.name = name;

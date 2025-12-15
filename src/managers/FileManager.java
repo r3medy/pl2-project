@@ -7,19 +7,17 @@ import java.time.LocalDate;
 
 import enums.*;
 import product.*;
-import users.*;
 import sales.*;
+import users.*;
 
-public class FileManager {
-    private String productsFilePath;
-    private String salesFilePath;
+public final class FileManager {
+    private static final String productsFilePath = "../../data/products.csv";
+    private static final String salesFilePath = "../../data/sales.csv";
+    private static final String usersFilePath = "../../data/users.csv"; 
     
-    public FileManager(String productsFilePath, String salesFilePath) {
-        this.productsFilePath = productsFilePath;
-        this.salesFilePath = salesFilePath;
-    }
+    public FileManager() {}
     
-    public boolean saveProducts(List<Product> products) {
+    public static boolean saveProducts(List<Product> products) {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(productsFilePath))) {
             for (Product p : products) {
                 if (p instanceof PerishableProduct) {
@@ -43,7 +41,7 @@ public class FileManager {
     }
 
     
-    public List<Product> loadProducts() {
+    public static List<Product> loadProducts() {
         List<Product> products = new ArrayList<>();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(productsFilePath))) {
             String line;
@@ -57,12 +55,10 @@ public class FileManager {
         return products;
     }
 
-    
-    public boolean saveSales(List<Sale> sales) {
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(salesFilePath))) {
-            for (Sale s : sales) {
-                writer.write(s.getSaleId() + "," + s.getSaleDate() + "," +
-                             s.getSubTotal() + "," + s.getDiscountAmount() + "," + s.getTotalAmount());
+    public static boolean saveUsers(List<User> users) {
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(usersFilePath))) {
+            for (User u : users) {
+                writer.write(u.getUserId() + "," + u.getUserType().name() + "," + u.getName() + "," + u.getUsername() + "," + u.getPassword());
                 writer.newLine();
             }
             return true;
@@ -72,25 +68,94 @@ public class FileManager {
         }
     }
 
-    
-    public List<Sale> loadSales() {
-        List<Sale> sales = new ArrayList<>();
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(salesFilePath))) {
+    public static List<User> loadUsers() {
+        List<User> users = new ArrayList<>();
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(usersFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                int saleId = Integer.parseInt(parts[0]);
-                LocalDate date = LocalDate.parse(parts[1]);
-                double subTotal = Double.parseDouble(parts[2]);
-                double discount = Double.parseDouble(parts[3]);
-                double total = Double.parseDouble(parts[4]);
+                int userId = Integer.parseInt(parts[0].trim());
+                String role = parts[1].trim();
+                String name = parts[2].trim();
+                String username = parts[3].trim();
+                String password = parts[4].trim();
 
-                Sale sale = new Sale();
-                sale.setSaleId(saleId);
-                sale.setSaleDate(date);
-                sale.setSubTotal(subTotal);
-                sale.setDiscountAmount(discount);
-                sale.setTotalAmount(total);
+                switch(role) {
+                    case "ADMIN":
+                        users.add(new Admin(userId, name, username, password));
+                        break;
+                    case "INVENTORY":
+                        users.add(new Inventory(userId, name, username, password));
+                        break;
+                    case "MARKETING":
+                        users.add(new Marketing(userId, name, username, password));
+                        break;
+                    case "SALES":
+                        users.add(new Sales(userId, name, username, password));
+                        break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public static boolean saveSales(List<Sale> sales) {
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(salesFilePath))) {
+            for (Sale s : sales) {
+                 
+                StringBuilder itemsStr = new StringBuilder();
+                for (int i = 0; i < s.getSaleItems().size(); i++) {
+                    SaleItem item = s.getSaleItems().get(i);
+                    itemsStr.append(item.getProduct().getProductId()).append(":").append(item.getQuantity());
+                    if (i < s.getSaleItems().size() - 1) {
+                        itemsStr.append(";");
+                    }
+                }
+                writer.write(s.getSaleId() + "," + s.getSaleDate() + "," +
+                     s.getSubTotal() + "," + s.getDiscountAmount() + "," + s.getTotalAmount() + "," + itemsStr);
+                writer.newLine();
+            }
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static List<Sale> loadSales() {
+        List<Sale> sales = new ArrayList<>();
+        List<Product> products = loadProducts();
+        
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(salesFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                
+                String[] parts = line.split(",");
+                int saleId = Integer.parseInt(parts[0].trim());
+                LocalDate date = LocalDate.parse(parts[1].trim());
+                
+                List<SaleItem> items = new ArrayList<>();
+                if (parts.length > 5 && parts[5] != null && !parts[5].trim().isEmpty()) {
+                    String[] itemParts = parts[5].split(";");
+                    for (String itemPart : itemParts) {
+                        if (itemPart.trim().isEmpty()) continue;
+                        String[] pq = itemPart.split(":");
+                        int productId = Integer.parseInt(pq[0].trim());
+                        int quantity = Integer.parseInt(pq[1].trim());
+                        
+                        for (Product p : products) {
+                            if (p.getProductId() == productId) {
+                                items.add(new SaleItem(p, quantity));
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                Sale sale = new Sale(saleId, date, items, null);
                 sales.add(sale);
             }
         } catch (IOException e) {
@@ -100,7 +165,7 @@ public class FileManager {
     }
 
   
-    public Product parseProductLine(String line) {
+    public static Product parseProductLine(String line) {
         try {
             String[] parts = line.split(",");
             int id = Integer.parseInt(parts[0]);

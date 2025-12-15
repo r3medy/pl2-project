@@ -31,12 +31,10 @@ public class SaleItem {
     }
 
 
-    // -- Getters
     public Product getProduct() { return product; }
     public int getQuantity() { return quantity; }    
     public double getSaleTotalPrice() { return saleTotalPrice; }
     
-    // -- Setters
     public void setProduct(Product newProduct) {
         if(newProduct == null) throw new IllegalArgumentException("Product cannot be null");
         this.product = newProduct;

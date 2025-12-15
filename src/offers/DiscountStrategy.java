@@ -1,6 +1,8 @@
 package offers;
 
+import enums.*;
+
 public interface DiscountStrategy {
-    abstract String getDiscountStrategy();
+    abstract DiscountStrategies getDiscountStrategy();
     abstract double applyDiscount(double subtotal);
 }

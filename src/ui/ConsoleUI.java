@@ -7,7 +7,6 @@ import org.jline.utils.AttributedStyle;
 import org.jline.utils.InfoCmp;
 
 public class ConsoleUI {
-    // In Class-diagram
     public void start() {
         String[] titles = {
             "Products",
@@ -97,24 +96,22 @@ public class ConsoleUI {
                 terminal.writer().flush();
                 int initialKey = terminal.reader().read();
 
-                // Arrow keys:
-                // ESC (27) + '[' (91) OR 'O' (79) + A/B/C/D
                 if (initialKey == 27) {
                     int secondKey = terminal.reader().read();
                     if (secondKey == 91 || secondKey == 79) {
                         int arrowDir = terminal.reader().read();
                         switch (arrowDir) {
-                            case 65: // Up
+                            case 65:
                                 if (inSubmenu) subMenuSelectedIdx = Math.max(0, subMenuSelectedIdx - 1);
                                 else selectedIdx = Math.max(0, selectedIdx - 1);
                                 break;
-                            case 66: // Down
+                            case 66:
                                 if (inSubmenu) subMenuSelectedIdx = Math.min(subMenuTitles[selectedIdx].length - 1, subMenuSelectedIdx + 1);
                                 else selectedIdx = Math.min(titles.length - 1, selectedIdx + 1);
                                 break;
                         }
                     }
-                } else if (initialKey == 13 || initialKey == 10) {
+                } else if (initialKey == 10 || initialKey == 13) {
                     if (inSubmenu) {
                         if (subMenuActions[selectedIdx] != null && subMenuActions[selectedIdx][subMenuSelectedIdx] != null) {
                             terminal.puts(InfoCmp.Capability.clear_screen);

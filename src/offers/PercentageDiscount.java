@@ -1,5 +1,7 @@
 package offers;
 
+import enums.DiscountStrategies;
+
 public class PercentageDiscount implements DiscountStrategy {
     private double percentage;
 
@@ -13,7 +15,7 @@ public class PercentageDiscount implements DiscountStrategy {
     }
 
     @Override
-    public String getDiscountStrategy() {
-        return enums.DiscountStrategy.PERCENTAGE_DISCOUNT.name();
+    public DiscountStrategies getDiscountStrategy() {
+        return DiscountStrategies.PERCENTAGE_DISCOUNT;
     }
 }

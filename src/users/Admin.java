@@ -12,7 +12,7 @@ public class Admin extends User {
     }
 
     @Override
-    public String getUserType() {
-        return UserType.ADMIN.name();
+    public UserType getUserType() {
+        return UserType.ADMIN;
     }
 }

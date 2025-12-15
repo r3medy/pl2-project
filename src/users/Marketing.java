@@ -12,7 +12,7 @@ public class Marketing extends User {
     }
 
     @Override
-    public String getUserType() {
-        return UserType.MARKETING.name();
+    public UserType getUserType() {
+        return UserType.MARKETING;
     }
 }

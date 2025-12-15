@@ -10,22 +10,21 @@ import sales.*;
 public class InventoryManager {
     private List<Product> products;
     private List<Sale> sales;
-    private FileManager fileManager = new FileManager("../../data/products.csv", "../../data/sales.csv");
 
     public InventoryManager() {
-        this.products = fileManager.loadProducts();
-        this.sales = fileManager.loadSales();
+        this.products = FileManager.loadProducts();
+        this.sales = FileManager.loadSales();
     }
 
     public boolean addProduct(Product product) {
         boolean isAdded = products.add(product);
-        if(isAdded) return fileManager.saveProducts(products);
+        if(isAdded) return FileManager.saveProducts(products);
         return false;
     }
 
     public boolean removeProduct(Product product) {
         boolean isRemoved = products.remove(product);
-        if(isRemoved) return fileManager.saveProducts(products);
+        if(isRemoved) return FileManager.saveProducts(products);
         return false;
     }
 
@@ -64,7 +63,7 @@ public class InventoryManager {
         if(product == null) return false;
         if(newStock < 0) return false;
         product.setStockQuantity(newStock);
-        return fileManager.saveProducts(products);
+        return FileManager.saveProducts(products);
     }
 
     public List<Product> listTopSellingProducts(int topN) {

@@ -5,11 +5,11 @@ import enums.*;
 public class NoDiscount implements DiscountStrategy {
     @Override
     public double applyDiscount(double subtotal) {
-        return subtotal;
+        return 0;
     }
 
     @Override
-    public String getDiscountStrategy() {
-        return enums.DiscountStrategy.NO_DISCOUNT.name();
+    public DiscountStrategies getDiscountStrategy() {
+        return DiscountStrategies.NO_DISCOUNT;
     }
 }

@@ -12,7 +12,7 @@ public class Sales extends User {
     }
 
     @Override
-    public String getUserType() {
-        return UserType.SALES.name();
+    public UserType getUserType() {
+        return UserType.SALES;
     }
 }

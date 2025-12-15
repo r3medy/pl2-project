@@ -14,12 +14,10 @@ public class NonPerishableProduct extends Product {
         setWarrantyMonths(warrantyMonths);
     }
 
-    // -- Getters
     @Override
     public String getProductType() { return ProductType.NON_PERISHABLE.name(); }
     public int getWarrantyMonths() { return warrantyMonths; }
 
-    // -- Setters
     public void setWarrantyMonths(int newWarrantyMonths) {
         if(newWarrantyMonths < 0) throw new IllegalArgumentException("Warranty months cannot be negative");
         this.warrantyMonths = newWarrantyMonths;
