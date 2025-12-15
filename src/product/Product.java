@@ -1,18 +1,27 @@
 package product;
-import java.util.List;
 
 import enums.*;
-import managers.FileManager;
-import sales.Sale;
 
 public abstract class Product {
-    private static int idCounter;
+    private static int idCounter = 0;
+    private static boolean idCounterInitialized = false;
     private int productId;
     private String name;
     private Category category;
     private double unitPrice;
     private int stockQuantity;
     private int lowStockQuantityThreshold;
+
+    // Call this method once at application startup to initialize the ID counter
+    public static void initializeIdCounter(java.util.List<Product> existingProducts) {
+        if (!idCounterInitialized && existingProducts != null) {
+            idCounter = existingProducts.stream()
+                    .mapToInt(Product::getProductId)
+                    .max()
+                    .orElse(0);
+            idCounterInitialized = true;
+        }
+    }
 
     public Product(String name, Category category, double unitPrice, int stockQuantity, int lowStockQuantityThreshold) {
         this(++idCounter, name, category, unitPrice, stockQuantity, lowStockQuantityThreshold);
@@ -26,11 +35,10 @@ public abstract class Product {
         if(stockQuantity < 0) throw new IllegalArgumentException("Stock quantity cannot be negative");
         if(lowStockQuantityThreshold < 0) throw new IllegalArgumentException("Low stock quantity threshold cannot be negative");
 
-        List<Product> existingProducts = FileManager.loadProducts();
-        Product.idCounter = existingProducts.stream()
-                .mapToInt(Product::getProductId)
-                .max()
-                .orElse(0);
+        // Update idCounter if this productId is larger (for products loaded from file)
+        if (productId > idCounter) {
+            idCounter = productId;
+        }
 
         this.productId = productId;
         this.name = name;
@@ -57,16 +65,15 @@ public abstract class Product {
     }
 
     public void productInformation() {
-        System.out.println("Product ID     :: " + productId);
-        System.out.println("Product Name   :: " + name);
-        System.out.println("Product Type   :: " + this.getProductType());
-        System.out.println("Unit Price     :: " + unitPrice);
-        System.out.println("Stock Quantity :: " + stockQuantity);
-        System.out.println("Category       :: " + category);
-        System.out.println("Low Threshold  :: " + lowStockQuantityThreshold);
-        System.out.println("Product Type   :: " + this.getProductType());
+        System.out.println("Product ID      :: " + productId);
+        System.out.println("Product Name    :: " + name);
+        System.out.println("Product Type    :: " + this.getProductType());
+        System.out.println("Unit Price      :: $" + unitPrice);
+        System.out.println("Stock Quantity  :: " + stockQuantity);
+        System.out.println("Category        :: " + category);
+        System.out.println("Low Threshold   :: " + lowStockQuantityThreshold);
         System.out.println(this instanceof PerishableProduct
-            ? "Expiry Date    :: " + ((PerishableProduct)this).getExpiryDate()
+            ? "Expiry Date     :: " + ((PerishableProduct)this).getExpiryDate()
             : "Warranty Months :: " + ((NonPerishableProduct)this).getWarrantyMonths());
     }
 

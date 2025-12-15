@@ -11,9 +11,9 @@ import sales.*;
 import users.*;
 
 public final class FileManager {
-    private static final String productsFilePath = "../../data/products.csv";
-    private static final String salesFilePath = "../../data/sales.csv";
-    private static final String usersFilePath = "../../data/users.csv"; 
+    private static final String productsFilePath = "data/products.csv";
+    private static final String salesFilePath = "data/sales.csv";
+    private static final String usersFilePath = "data/users.csv"; 
     
     public FileManager() {}
     
@@ -167,24 +167,26 @@ public final class FileManager {
   
     public static Product parseProductLine(String line) {
         try {
+            if (line == null || line.trim().isEmpty() || line.trim().toLowerCase().startsWith("id")) return null;
+
             String[] parts = line.split(",");
-            int id = Integer.parseInt(parts[0]);
-            String name = parts[1];
-            Category category = Category.valueOf(parts[2]);
-            double unitPrice = Double.parseDouble(parts[3]);
-            int stock = Integer.parseInt(parts[4]);
-            int lowStockQuantityThreshold = Integer.parseInt(parts[5]);
-            String type = parts[6];
+            int id = Integer.parseInt(parts[0].trim());
+            String name = parts[1].trim();
+            Category category = Category.valueOf(parts[2].trim());
+            double unitPrice = Double.parseDouble(parts[3].trim());
+            int stock = Integer.parseInt(parts[4].trim());
+            int lowStockQuantityThreshold = Integer.parseInt(parts[5].trim());
+            String type = parts[6].trim();
 
             if (ProductType.PERISHABLE.name().equalsIgnoreCase(type)) {
-                LocalDate expiry = LocalDate.parse(parts[7]);
+                LocalDate expiry = LocalDate.parse(parts[7].trim());
                 return new PerishableProduct(id, name, category, unitPrice, stock, lowStockQuantityThreshold, expiry);
             } else {
-                int warrantyMonths = Integer.parseInt(parts[7]);
+                int warrantyMonths = Integer.parseInt(parts[7].trim());
                 return new NonPerishableProduct(id, name, category, unitPrice, stock, lowStockQuantityThreshold, warrantyMonths);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace(); // Suppress stack trace for expected failures like headers or malformed lines
             return null;
         }
     }

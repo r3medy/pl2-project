@@ -6,7 +6,24 @@ import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
 import org.jline.utils.InfoCmp;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Scanner;
+
+import enums.Category;
+import managers.FileManager;
+import managers.InventoryManager;
+import offers.*;
+import product.*;
+import sales.*;
+
 public class ConsoleUI {
+    private final InventoryManager inventoryManager = new InventoryManager();
+    private final Scanner scanner = new Scanner(System.in);
+    private Terminal terminal;
+
+    public ConsoleUI() {}
+
     public void start() {
         String[] titles = {
             "Products",
@@ -25,6 +42,7 @@ public class ConsoleUI {
             {
                 "Add Product",
                 "View Products",
+                "Search Product",
                 "Back"
             },
             {
@@ -33,8 +51,11 @@ public class ConsoleUI {
                 "Back"
             },
             {
-                "Daily Report",
-                "Monthly Report",
+                "Low Stock Report",
+                "Sales Summary",
+                "Top Selling Products",
+                "Expired Products",
+                "Near Expiry Products",
                 "Back"
             },
             null
@@ -42,18 +63,22 @@ public class ConsoleUI {
 
         Runnable[][] subMenuActions = {
             {
-                () -> System.out.println("Adding product..."),
-                () -> System.out.println("Viewing products..."),
+                null,
+                null,
+                null,
                 null
             },
             {
-                () -> System.out.println("New sale..."),
-                () -> System.out.println("Viewing sales..."),
+                null,
+                null,
                 null
             },
             {
-                () -> System.out.println("Daily report..."),
-                () -> System.out.println("Monthly report..."),
+                null,
+                null,
+                null,
+                null,
+                null,
                 null
             },
             null
@@ -63,19 +88,21 @@ public class ConsoleUI {
     }
 
     public void displayProductsMenu() {}
-
     public void displaySalesMenu() {}
-
     public void displayReportsMenu() {}
     
     public void exit() {
+        System.out.println("\nGoodbye!");
+        for (Product p : inventoryManager.getProducts()) {
+            p.productInformation();
+            System.out.println("\n------------------------\n");
+        }
         System.exit(0);
     }
-    
 
     private void displayMenu(String[] titles, Runnable[] actions, String[][] subMenuTitles, Runnable[][] subMenuActions) {
         try {
-            Terminal terminal = TerminalBuilder.terminal();
+            terminal = TerminalBuilder.terminal();
             terminal.enterRawMode();
 
             int selectedIdx = 0;
@@ -85,6 +112,9 @@ public class ConsoleUI {
             while (true) {
                 terminal.puts(InfoCmp.Capability.clear_screen);
                 terminal.writer().flush();
+                
+                terminal.writer().println("========== HYPERMARKET MANAGEMENT SYSTEM ==========\r");
+                
                 for (int i = 0; i < titles.length; i++) {
                     terminal.writer().print(getOptionStyle(titles[i], i == selectedIdx, false).toAnsi() + "\r\n");
 
@@ -93,7 +123,9 @@ public class ConsoleUI {
                             terminal.writer().print(getOptionStyle(subMenuTitles[i][j], j == subMenuSelectedIdx, true).toAnsi() + "\r\n");
                 }
                 
+                terminal.writer().println("Use ↑↓ arrows to navigate, Enter to select\r");
                 terminal.writer().flush();
+                
                 int initialKey = terminal.reader().read();
 
                 if (initialKey == 27) {
@@ -116,8 +148,11 @@ public class ConsoleUI {
                         if (subMenuActions[selectedIdx] != null && subMenuActions[selectedIdx][subMenuSelectedIdx] != null) {
                             terminal.puts(InfoCmp.Capability.clear_screen);
                             terminal.writer().flush();
+                            terminal.close();
+                            
                             subMenuActions[selectedIdx][subMenuSelectedIdx].run();
-                            break;
+                            start();
+                            return;
                         }
                         inSubmenu = false;
                         subMenuSelectedIdx = 0;
@@ -139,6 +174,6 @@ public class ConsoleUI {
     private AttributedString getOptionStyle(String optionText, boolean isSelected, boolean isSubmenu) {
         return isSelected ?
             new AttributedString((isSubmenu ? "  ├─ " : "→ ") + optionText, AttributedStyle.DEFAULT.foreground(isSubmenu ? AttributedStyle.YELLOW : AttributedStyle.CYAN)) :
-            new AttributedString((isSubmenu ? "  │   " : "") + optionText);
+            new AttributedString((isSubmenu ? "  │   " : "  ") + optionText);
     }
 }

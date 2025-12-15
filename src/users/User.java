@@ -1,11 +1,9 @@
 package users;
-import java.util.List;
 
 import enums.*;
-import managers.FileManager;
 
 public abstract class User {
-    private static int idCounter;
+    private static int idCounter = 0;
     protected int userId;
     protected String name;
     protected String username;
@@ -17,11 +15,10 @@ public abstract class User {
         if(username == null || username.trim().isEmpty()) throw new IllegalArgumentException("Username cannot be empty");
         if(password == null || password.trim().isEmpty()) throw new IllegalArgumentException("Password cannot be empty");
 
-        List<User> existingUsers = FileManager.loadUsers();
-        User.idCounter = existingUsers.stream()
-                .mapToInt(User::getUserId)
-                .max()
-                .orElse(0);
+        // Update idCounter if this userId is larger (for users loaded from file)
+        if (userId > idCounter) {
+            idCounter = userId;
+        }
 
         this.userId = userId;
         this.name = name;
