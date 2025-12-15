@@ -1,5 +1,5 @@
 userId ,role      ,name          ,username     ,password
-     1 ,ADMIN     ,Yousef Adel   ,yousef.admin ,admin123
+     1 ,ADMIN     ,Yousef Adel   ,yousef       ,admin123
      2 ,ADMIN     ,Sara Hassan   ,sara.admin   ,admin123
      3 ,INVENTORY ,Ahmed Nabil   ,ahmed.inv    ,inv123
      4 ,INVENTORY ,Mohamed Tarek ,mohamed.inv  ,inv123

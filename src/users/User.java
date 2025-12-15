@@ -15,10 +15,7 @@ public abstract class User {
         if(username == null || username.trim().isEmpty()) throw new IllegalArgumentException("Username cannot be empty");
         if(password == null || password.trim().isEmpty()) throw new IllegalArgumentException("Password cannot be empty");
 
-        // Update idCounter if this userId is larger (for users loaded from file)
-        if (userId > idCounter) {
-            idCounter = userId;
-        }
+        if (userId > idCounter) idCounter = userId;
 
         this.userId = userId;
         this.name = name;

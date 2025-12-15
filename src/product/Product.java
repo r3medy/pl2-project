@@ -1,7 +1,9 @@
 package product;
 
+import java.util.List;
 import enums.*;
 
+// TODO: update product in file when a setter is called
 public abstract class Product {
     private static int idCounter = 0;
     private static boolean idCounterInitialized = false;
@@ -12,8 +14,7 @@ public abstract class Product {
     private int stockQuantity;
     private int lowStockQuantityThreshold;
 
-    // Call this method once at application startup to initialize the ID counter
-    public static void initializeIdCounter(java.util.List<Product> existingProducts) {
+    public static void initializeIdCounter(List<Product> existingProducts) {
         if (!idCounterInitialized && existingProducts != null) {
             idCounter = existingProducts.stream()
                     .mapToInt(Product::getProductId)
@@ -35,10 +36,7 @@ public abstract class Product {
         if(stockQuantity < 0) throw new IllegalArgumentException("Stock quantity cannot be negative");
         if(lowStockQuantityThreshold < 0) throw new IllegalArgumentException("Low stock quantity threshold cannot be negative");
 
-        // Update idCounter if this productId is larger (for products loaded from file)
-        if (productId > idCounter) {
-            idCounter = productId;
-        }
+        if (productId > idCounter) idCounter = productId;
 
         this.productId = productId;
         this.name = name;

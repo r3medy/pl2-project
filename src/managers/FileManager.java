@@ -6,6 +6,7 @@ import java.util.*;
 import java.time.LocalDate;
 
 import enums.*;
+import offers.*;
 import product.*;
 import sales.*;
 import users.*;
@@ -74,6 +75,7 @@ public final class FileManager {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
+                if(parts[0].trim().toLowerCase().startsWith("userid")) continue;
                 int userId = Integer.parseInt(parts[0].trim());
                 String role = parts[1].trim();
                 String name = parts[2].trim();
@@ -131,15 +133,16 @@ public final class FileManager {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(salesFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
+                if (line.trim().isEmpty() || line.trim().toLowerCase().startsWith("id")) continue;
                 
                 String[] parts = line.split(",");
                 int saleId = Integer.parseInt(parts[0].trim());
                 LocalDate date = LocalDate.parse(parts[1].trim());
+                double discountAmount = Double.parseDouble(parts[3].trim());
                 
                 List<SaleItem> items = new ArrayList<>();
                 if (parts.length > 5 && parts[5] != null && !parts[5].trim().isEmpty()) {
-                    String[] itemParts = parts[5].split(";");
+                    String[] itemParts = parts[5].trim().split(";");
                     for (String itemPart : itemParts) {
                         if (itemPart.trim().isEmpty()) continue;
                         String[] pq = itemPart.split(":");
@@ -155,7 +158,10 @@ public final class FileManager {
                     }
                 }
                 
-                Sale sale = new Sale(saleId, date, items, null);
+                DiscountStrategy discountStrategy = discountAmount > 0 
+                    ? new FixedDiscount(discountAmount) 
+                    : new NoDiscount();
+                Sale sale = new Sale(saleId, date, items, discountStrategy);
                 sales.add(sale);
             }
         } catch (IOException e) {
@@ -186,7 +192,7 @@ public final class FileManager {
                 return new NonPerishableProduct(id, name, category, unitPrice, stock, lowStockQuantityThreshold, warrantyMonths);
             }
         } catch (Exception e) {
-            // e.printStackTrace(); // Suppress stack trace for expected failures like headers or malformed lines
+            e.printStackTrace();
             return null;
         }
     }

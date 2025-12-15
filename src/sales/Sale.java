@@ -9,7 +9,8 @@ import offers.*;
 import product.Product;
 
 public class Sale {
-    private static int idCounter;
+    private static int idCounter = 0;
+    private static boolean idCounterInitialized = false;
     private int saleId;
     private LocalDate saleDate;
     private List<SaleItem> items;
@@ -17,25 +18,37 @@ public class Sale {
     private double subTotal;
     private double discountAmount;
     private double totalAmount;
+
+    private static void initIdCounterIfNeeded() {
+        if (!idCounterInitialized) {
+            idCounterInitialized = true;
+            List<Sale> existingSales = FileManager.loadSales();
+            idCounter = existingSales.stream()
+                    .mapToInt(Sale::getSaleId)
+                    .max()
+                    .orElse(0);
+        }
+    }
     
     public Sale() {
         this(null);
     }
 
     public Sale(DiscountStrategy discountStrategy) {
-        this(++idCounter, LocalDate.now(), new ArrayList<>(), discountStrategy);
+        initIdCounterIfNeeded();
+        this.saleId = ++idCounter;
+        this.saleDate = LocalDate.now();
+        this.items = new ArrayList<>();
+        this.discountStrategy = discountStrategy == null ? new NoDiscount() : discountStrategy;
+        this.subTotal = 0.0;
+        this.discountAmount = 0.0;
+        this.totalAmount = 0.0;
     }
 
     public Sale(int saleId, LocalDate saleDate, List<SaleItem> items, DiscountStrategy discountStrategy) {
         if(saleId <= 0) throw new IllegalArgumentException("Sale ID must be greater than 0");
         if(saleDate == null) throw new IllegalArgumentException("Sale date cannot be null");
         if(items == null) throw new IllegalArgumentException("Items cannot be null");
-
-        List<Sale> existingSales = FileManager.loadSales();
-        Sale.idCounter = existingSales.stream()
-                .mapToInt(Sale::getSaleId)
-                .max()
-                .orElse(0);
 
         this.saleId = saleId;
         this.saleDate = saleDate;
@@ -44,6 +57,7 @@ public class Sale {
         this.subTotal = 0.0;
         this.discountAmount = 0.0;
         this.totalAmount = 0.0;
+        recalcTotals();
     }
 
     public boolean addSaleItem(SaleItem item) {
@@ -64,16 +78,14 @@ public class Sale {
         return removed;
     }
 
-    public String generateReceipt() {
+    public void generateReceipt() {
         System.out.println("Sale ID    :: " + saleId);
         System.out.println("Date       :: " + saleDate);
-        System.out.println("Items      :: ");
-        for (SaleItem item : items) System.out.println("    - " + item.getProduct().getName() + " x" + item.getQuantity() + " = " + item.getSaleTotalPrice());
-        System.out.println("--------------------------------");
-        System.out.println("Subtotal   :: " + subTotal);
-        System.out.println("Discount   :: " + discountAmount);
-        System.out.println("Total      :: " + totalAmount);
-        return "";
+        System.out.println("Items      :: \n");
+        for (SaleItem item : items) System.out.printf("   ├─ %-20s x%d = %5.2f$%n", item.getProduct().getName(), item.getQuantity(), item.getSaleTotalPrice());
+        System.out.printf("%n- Subtotal   :: %5.2f$%n", subTotal);
+        System.out.printf("- Discount   :: %5.2f$%n", discountAmount);
+        System.out.printf("- Total      :: %5.2f$%n", totalAmount);
     }
 
     private void recalcTotals() {
@@ -91,14 +103,12 @@ public class Sale {
 
     
     public void processSale() {
-        // Decrease stock for all items
         for(SaleItem item : this.items) {
             Product p = item.getProduct();
             int qty = item.getQuantity();
             p.decreaseStock(qty);
         }
         
-        // Save the sale
         List<Sale> allSales = FileManager.loadSales();
         boolean found = false;
         for(int i = 0; i < allSales.size(); i++) {
