@@ -11,7 +11,7 @@ public class PercentageDiscount implements DiscountStrategy {
 
     @Override
     public double applyDiscount(double subtotal) {
-        return subtotal * (percentage / 100);
+        return subtotal - (subtotal * (percentage / 100));
     }
 
     @Override

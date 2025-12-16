@@ -19,7 +19,7 @@ public class SaleItem {
 
         this.product = product;
         this.quantity = quantity;
-        this.saleTotalPrice = product.getUnitPrice() * quantity;
+        recalculateTotals();
     }
     
     public SaleItem(Product product, int quantity) {
@@ -34,7 +34,7 @@ public class SaleItem {
 
     private void recalculateTotals() {
         itemSubtotal = product.getUnitPrice() * quantity;
-        itemDiscount = product.getDiscountStrategy().applyDiscount(itemSubtotal);
+        itemDiscount = 0;
         saleTotalPrice = itemSubtotal - itemDiscount;
     }
 

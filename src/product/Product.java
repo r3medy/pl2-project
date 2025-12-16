@@ -96,6 +96,27 @@ public abstract class Product {
     public int getStockQuantity() { return stockQuantity; }
     public Category getCategory() { return category; }
     public int getLowStockQuantityThreshold() { return lowStockQuantityThreshold; }
+
+    public String getExpiryOrWarrantyDisplay() {
+        if (this instanceof PerishableProduct) return ((PerishableProduct) this).getExpiryDate().toString();
+        else return ((NonPerishableProduct) this).getWarrantyMonths() + " Months";
+    }
+
+    public String getDiscountDisplay() {
+        if (discountStrategy instanceof BuyXGetYFree) {
+            BuyXGetYFree d = (BuyXGetYFree) discountStrategy;
+            return "Buy " + d.getBuyQuantity() + " Get " + d.getFreeQuantity() + " Free";
+        }
+        return "None";
+    }
+
+    public String getPriceDisplay() {
+        return "$" + unitPrice;
+    }
+
+    public String getLowStockDisplay() {
+        return isLowStock() ? "Yes" : "No";
+    }
     public abstract String getProductType();
 
     public void setDiscountStrategy(DiscountStrategy discountStrategy) {

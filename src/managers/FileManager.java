@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import enums.*;
 import offers.*;
@@ -117,7 +118,7 @@ public class FileManager {
                     }
                 }
                 writer.write(s.getSaleId() + "," + s.getSaleDate() + "," +
-                     s.getTotal() + "," + s.getDiscountAmount() + "," + s.getTotalAmount() + "," + itemsStr);
+                     s.getSubTotal() + "," + s.getDiscountAmount() + "," + s.getTotal() + "," + itemsStr);
                 writer.newLine();
             }
             return true;
@@ -130,6 +131,7 @@ public class FileManager {
     public static List<Sale> loadSales() {
         List<Sale> sales = new ArrayList<>();
         List<Product> products = loadProducts();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
         
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(salesFilePath))) {
             String line;
@@ -137,9 +139,21 @@ public class FileManager {
                 if (line.trim().isEmpty() || line.trim().toLowerCase().startsWith("id")) continue;
                 
                 String[] parts = line.split(",");
+                if (parts.length < 5) continue;
+                
                 int saleId = Integer.parseInt(parts[0].trim());
-                LocalDate date = LocalDate.parse(parts[1].trim());
-                double discountAmount = Double.parseDouble(parts[3].trim());
+                
+                String dateStr = parts[1].trim();
+                LocalDate date;
+                try {
+                    date = LocalDate.parse(dateStr, dateFormatter);
+                } catch (java.time.format.DateTimeParseException e) {
+                    date = LocalDate.parse(dateStr);
+                }
+
+                double storedSubtotal = Double.parseDouble(parts[2].trim());
+                double storedDiscount = Double.parseDouble(parts[3].trim());
+                double storedTotal = Double.parseDouble(parts[4].trim());
                 
                 List<SaleItem> items = new ArrayList<>();
                 if (parts.length > 5 && parts[5] != null && !parts[5].trim().isEmpty()) {
@@ -159,10 +173,7 @@ public class FileManager {
                     }
                 }
                 
-                DiscountStrategy discountStrategy = discountAmount > 0 
-                    ? new FixedDiscount(discountAmount) 
-                    : new NoDiscount();
-                Sale sale = new Sale(saleId, date, items, discountStrategy);
+                Sale sale = new Sale(saleId, date, items, null, storedSubtotal, storedDiscount, storedTotal);
                 sales.add(sale);
             }
         } catch (IOException e) {
