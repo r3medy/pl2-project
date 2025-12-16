@@ -1,17 +1,17 @@
 package offers;
 
-import enums.DiscountStrategies;
+import enums.*;
 
 public class FixedDiscount implements DiscountStrategy {
     private double discountAmount;
 
     public FixedDiscount(double discountAmount) {
-        this.discountAmount = discountAmount;
+        this.discountAmount =Math.max(0,discountAmount);
     }
 
     @Override
     public double applyDiscount(double subtotal) {
-        return discountAmount;
+        return Math.min(discountAmount,subtotal);
     }
 
     @Override

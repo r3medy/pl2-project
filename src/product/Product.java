@@ -1,5 +1,5 @@
 package product;
-
+import offers.*;
 import java.util.List;
 import enums.*;
 
@@ -12,6 +12,8 @@ public abstract class Product {
     private double unitPrice;
     private int stockQuantity;
     private int lowStockQuantityThreshold;
+    private DiscountStrategy discountStrategy;
+
 
     public static void initializeIdCounter(List<Product> existingProducts) {
         if (!idCounterInitialized && existingProducts != null) {
@@ -35,7 +37,7 @@ public abstract class Product {
         if(stockQuantity < 0) throw new IllegalArgumentException("Stock quantity cannot be negative");
         if(lowStockQuantityThreshold < 0) throw new IllegalArgumentException("Low stock quantity threshold cannot be negative");
 
-        if(productId > idCounter) idCounter = productId;
+        if (productId > idCounter) idCounter = productId;
 
         this.productId = productId;
         this.name = name;
@@ -43,6 +45,7 @@ public abstract class Product {
         this.unitPrice = unitPrice;
         this.stockQuantity = stockQuantity;
         this.lowStockQuantityThreshold = lowStockQuantityThreshold;
+        this.discountStrategy= new NoDiscount();
     }
 
     public boolean increaseStock(int increment) {
@@ -59,6 +62,20 @@ public abstract class Product {
 
     public boolean isLowStock() {
         return this.stockQuantity <= this.lowStockQuantityThreshold;
+    }
+
+    public DiscountStrategy getDiscountStrategy() {
+        return discountStrategy;
+    }
+    public void setDiscountStrategy(DiscountStrategy discountStrategy) {
+        this.discountStrategy = (discountStrategy == null) ? new NoDiscount() : discountStrategy;
+    }
+    public boolean isDiscountEligible() {
+        return discountStrategy.isActive();
+    }
+    public double getDiscountedUnitPrice() {
+        double discount = discountStrategy.applyDiscount(unitPrice);
+        return unitPrice - discount;
     }
 
     public void productInformation() {
@@ -80,7 +97,9 @@ public abstract class Product {
     public int getStockQuantity() { return stockQuantity; }
     public Category getCategory() { return category; }
     public int getLowStockQuantityThreshold() { return lowStockQuantityThreshold; }
+
     public abstract String getProductType();
+
 
     public void setName(String name) {
         if(name == null || name.trim().isEmpty()) throw new IllegalArgumentException("Product name cannot be empty");

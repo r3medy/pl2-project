@@ -15,9 +15,13 @@ public class Sale {
     private LocalDate saleDate;
     private List<SaleItem> items;
     private DiscountStrategy discountStrategy;
-    private double subTotal;
+    private double Total;
     private double discountAmount;
     private double totalAmount;
+    private double itemsSubtotal;
+    private double itemDiscountsTotal;
+    private double saleDiscount;
+
 
     private static void initIdCounterIfNeeded() {
         if (!idCounterInitialized) {
@@ -40,9 +44,7 @@ public class Sale {
         this.saleDate = LocalDate.now();
         this.items = new ArrayList<>();
         this.discountStrategy = discountStrategy == null ? new NoDiscount() : discountStrategy;
-        this.subTotal = 0.0;
-        this.discountAmount = 0.0;
-        this.totalAmount = 0.0;
+        recalcTotals();
     }
 
     public Sale(int saleId, LocalDate saleDate, List<SaleItem> items, DiscountStrategy discountStrategy) {
@@ -54,7 +56,7 @@ public class Sale {
         this.saleDate = saleDate;
         this.items = items;
         this.discountStrategy = discountStrategy == null ? new NoDiscount() : discountStrategy;
-        this.subTotal = 0.0;
+        this.Total = 0.0;
         this.discountAmount = 0.0;
         this.totalAmount = 0.0;
         recalcTotals();
@@ -78,25 +80,36 @@ public class Sale {
         return removed;
     }
 
+    private void recalcTotals() {
+        itemsSubtotal = items.stream()
+                .mapToDouble(i -> i.getProduct().getUnitPrice() * i.getQuantity())
+                .sum();
+
+                itemDiscountsTotal = items.stream()
+                .mapToDouble(SaleItem::getItemDiscount)
+                .sum();
+
+        Total = itemsSubtotal - itemDiscountsTotal;
+
+        saleDiscount = discountStrategy.applyDiscount(Total);
+
+        discountAmount = itemDiscountsTotal + saleDiscount;
+        totalAmount = Total - saleDiscount;
+    }
+
     public void generateReceipt() {
         System.out.println("Sale ID    :: " + saleId);
         System.out.println("Date       :: " + saleDate);
         System.out.println("Items      :: \n");
         for (SaleItem item : items) System.out.printf("   ├─ %-20s x%d = %5.2f$%n", item.getProduct().getName(), item.getQuantity(), item.getSaleTotalPrice());
-        System.out.printf("%n- Subtotal   :: %5.2f$%n", subTotal);
+        System.out.printf("%n- Total   :: %5.2f$%n", Total);
         System.out.printf("- Discount   :: %5.2f$%n", discountAmount);
         System.out.printf("- Total      :: %5.2f$%n", totalAmount);
     }
 
-    private void recalcTotals() {
-        subTotal = items.stream().mapToDouble(SaleItem::getSaleTotalPrice).sum();
-        discountAmount = discountStrategy.applyDiscount(subTotal);
-        totalAmount = subTotal - discountAmount;
-    }
-
     public LocalDate getSaleDate() { return saleDate; }
     public List<SaleItem> getSaleItems() { return items; }
-    public double getSubTotal() { return subTotal; }
+    public double getTotal() { return Total; }
     public double getDiscountAmount() { return discountAmount; }
     public double getTotalAmount() { return totalAmount; }
     public int getSaleId() { return saleId; }

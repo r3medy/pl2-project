@@ -5,6 +5,8 @@ import managers.*;
 public class SaleItem {
     private Product product;
     private int quantity;
+    private double itemSubtotal;
+    private double itemDiscount;
     private double saleTotalPrice;
 
     public SaleItem(int productId, int quantity) {
@@ -27,24 +29,32 @@ public class SaleItem {
 
         this.product = product;
         this.quantity = quantity;
-        this.saleTotalPrice = product.getUnitPrice() * quantity;
+        recalculateTotals();
+    }
+
+    private void recalculateTotals() {
+        itemSubtotal = product.getUnitPrice() * quantity;
+        itemDiscount = product.getDiscountStrategy().applyDiscount(itemSubtotal);
+        saleTotalPrice = itemSubtotal - itemDiscount;
     }
 
 
     public Product getProduct() { return product; }
-    public int getQuantity() { return quantity; }    
+    public int getQuantity() { return quantity; }
+    public double getItemSubtotal() { return itemSubtotal; }
+    public double getItemDiscount() { return itemDiscount; }
     public double getSaleTotalPrice() { return saleTotalPrice; }
-    
+
     public void setProduct(Product newProduct) {
         if(newProduct == null) throw new IllegalArgumentException("Product cannot be null");
         this.product = newProduct;
-        this.saleTotalPrice = newProduct.getUnitPrice() * this.quantity;
+        recalculateTotals();
     }
 
     public void setQuantity(int newQuantity) {
         if(newQuantity <= 0) throw new IllegalArgumentException("Quantity must be greater than 0");
         if(this.product.getStockQuantity() < newQuantity) throw new IllegalArgumentException("Product quantity is not enough");
         this.quantity = newQuantity;
-        this.saleTotalPrice = this.product.getUnitPrice() * newQuantity;
+        recalculateTotals();
     }
 }

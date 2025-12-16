@@ -3,6 +3,9 @@ package offers;
 import enums.*;
 
 public interface DiscountStrategy {
-    abstract DiscountStrategies getDiscountStrategy();
-    abstract double applyDiscount(double subtotal);
+     DiscountStrategies getDiscountStrategy();
+     double applyDiscount(double subtotal);
+     default boolean isActive() {
+        return getDiscountStrategy() != DiscountStrategies.NO_DISCOUNT;
+    }
 }

@@ -153,7 +153,7 @@ public class ConsoleUI {
             null,
             () -> this.viewProducts(),
             () -> this.addProduct(null),
-            null,
+            () -> this.deleteProduct(null),
             null,
             () -> this.viewDiscounts(),
             null,
@@ -200,7 +200,7 @@ public class ConsoleUI {
             () -> this.viewProductsByCategory(Category.OTHER),
             null,
             () -> this.start(null),
-            this::exit
+            () -> this.exit()
         };
 
         this.displayMenu(titles, actions, null, null);
@@ -680,7 +680,7 @@ public class ConsoleUI {
         }
 
         String unitPrice = lineReader.readLine("Enter the product unit price :: ");
-        if(!isDouble(unitPrice)) { addProduct("Invalid product unit price"); return; }
+        if(!isDouble(unitPrice) && !isInteger(unitPrice)) { addProduct("Invalid product unit price"); return; }
 
         String stockQuantity = lineReader.readLine("Enter the product stock quantity :: ");
         if(!isInteger(stockQuantity)) { addProduct("Invalid product stock quantity"); return; }
@@ -710,5 +710,18 @@ public class ConsoleUI {
         waitForEnterKey();
     }
 
-    private void deleteProduct(String errorMessage) {}
+    private void deleteProduct(String errorMessage) {
+        clear();
+        printTitle();
+
+        if(errorMessage != null) displayErrorMessage(errorMessage);
+
+        String productId = lineReader.readLine("Enter the product ID :: ");
+        Product p = inventoryManager.findProductById(Integer.parseInt(productId));
+        if(p == null) { deleteProduct("Product not found"); return; }
+
+        inventoryManager.removeProduct(p);
+        terminal.writer().println("Product deleted successfully");
+        waitForEnterKey();
+    }
 }
