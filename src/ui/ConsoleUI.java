@@ -1,5 +1,7 @@
 package ui;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.jline.reader.LineReader;
@@ -146,11 +148,11 @@ public class ConsoleUI {
 
         Runnable[] actions = {
             () -> this.viewUsers(),
-            null,
-            null,
+            () -> this.addUser(null),
+            () -> this.deleteUser(null),
             null,
             () -> this.viewProducts(),
-            null,
+            () -> this.addProduct(null),
             null,
             null,
             () -> this.viewDiscounts(),
@@ -355,12 +357,30 @@ public class ConsoleUI {
         terminal.writer().flush();
     }
 
+    private boolean isInteger(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean isDouble(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     private void viewUsers() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %20s %20s%n%n", "ID", "Name", "Username", "Type");
+        terminal.writer().printf("%5s %20s %20s %20s\n\n", "ID", "Name", "Username", "Type");
         for(User u : usersManager.getUsers()) {
-            terminal.writer().printf("%5d %20s %20s %20s%n", u.getUserId(), u.getName(), u.getUsername(), u.getUserType());
+            terminal.writer().printf("%5d %20s %20s %20s\n", u.getUserId(), u.getName(), u.getUsername(), u.getUserType());
         }
         waitForEnterKey();
     }
@@ -368,9 +388,9 @@ public class ConsoleUI {
     private void viewProducts() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s%n%n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
+        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
         for(Product p : inventoryManager.getProducts()) {
-            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s%n",
+            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -387,12 +407,12 @@ public class ConsoleUI {
     private void viewDiscounts() {
         clear();
         printTitle();
-        terminal.writer().printf("%10s %15s %15s %15s %15s%n%n", "SaleID", "Date", "Subtotal", "Discount", "Total");
+        terminal.writer().printf("%10s %15s %15s %15s %15s\n\n", "SaleID", "Date", "Subtotal", "Discount", "Total");
         
         List<Sale> sales = FileManager.loadSales();
         for (Sale s : sales) {
             if (s.getDiscountAmount() > 0) {
-                terminal.writer().printf("%10d %15s %15.2f$ %15.2f$ %15.2f$%n",
+                terminal.writer().printf("%10d %15s %15.2f$ %15.2f$ %15.2f$\n",
                     s.getSaleId(),
                     s.getSaleDate(),
                     s.getSubTotal(),
@@ -408,9 +428,9 @@ public class ConsoleUI {
     private void viewNearExpiryProducts() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s%n%n", "ID", "Name", "Price", "Stock Qty.", "Category", "Near Expiry?", "Expiry Date");
+        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Near Expiry?", "Expiry Date");
         for(Product p : inventoryManager.listNearExpiryProducts()) {
-            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s%n",
+            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -426,10 +446,10 @@ public class ConsoleUI {
     private void viewExpiredProducts() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s%n%n", "ID", "Name", "Price", "Stock Qty.", "Category", "Expired?", "Expiry Date");
+        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Expired?", "Expiry Date");
         for(Product p : inventoryManager.listExpiredProducts()) {
             if (!(p instanceof PerishableProduct)) continue;
-                terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s%n",
+                terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -445,10 +465,10 @@ public class ConsoleUI {
     private void viewLowStockProducts() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s%n%n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?");
+        terminal.writer().printf("%5s %20s %10s %15s %15s %5s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?");
         for(Product p : inventoryManager.listLowStockProducts()) {
             if (!(p instanceof PerishableProduct)) continue;
-                terminal.writer().printf("%5d %20s %10s %15s %15s %5s%n",
+                terminal.writer().printf("%5d %20s %10s %15s %15s %5s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -463,9 +483,9 @@ public class ConsoleUI {
     private void viewProductsByCategory(Category category) {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s%n%n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
+        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
         for(Product p : inventoryManager.listProductsByCategory(category)) {
-            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s%n",
+            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -481,9 +501,9 @@ public class ConsoleUI {
     private void viewSales() {
         clear();
         printTitle();
-        terminal.writer().printf("%10s %15s %15s %15s %15s%n%n", "SaleID", "Date", "Subtotal", "Discount", "Total");
+        terminal.writer().printf("%10s %15s %15s %15s %15s\n\n", "SaleID", "Date", "Subtotal", "Discount", "Total");
         for (Sale s : FileManager.loadSales()) {
-            terminal.writer().printf("%10d %15s %15.2f$ %15.2f$ %15.2f$%n",
+            terminal.writer().printf("%10d %15s %15.2f$ %15.2f$ %15.2f$\n",
                 s.getSaleId(),
                 s.getSaleDate(),
                 s.getSubTotal(),
@@ -498,10 +518,10 @@ public class ConsoleUI {
         clear();
         printTitle();
         int ctr=0;
-        terminal.writer().printf("%5s %5s %20s %12s %10s %15s %15s %5s %15s%n%n", "No.", "ID", "Name", "Units Sold", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry/Warranty");
+        terminal.writer().printf("%5s %5s %20s %12s %10s %15s %15s %5s %15s\n\n", "No.", "ID", "Name", "Units Sold", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry/Warranty");
         for(Product p : (isTop ? inventoryManager.listTopSellingProducts(limit) : inventoryManager.listLeastSellingProducts(limit))) {
             ctr++;
-            terminal.writer().printf("%5s %5d %20s %12d %10s %15s %15s %5s %15s%n",
+            terminal.writer().printf("%5s %5d %20s %12d %10s %15s %15s %5s %15s\n",
                 ctr == 1 ? "1st" : ctr == 2 ? "2nd" : ctr == 3 ? "3rd" : ctr + "th",
                 p.getProductId(),
                 p.getName(),
@@ -520,10 +540,7 @@ public class ConsoleUI {
         clear();
         printTitle();
         
-        if(errorMessage != null) {
-            terminal.writer().println((new AttributedString(errorMessage, AttributedStyle.BOLD.foreground(AttributedStyle.RED))).toAnsi() + "\r");
-            terminal.writer().flush();
-        }
+        if(errorMessage != null) displayErrorMessage(errorMessage);
 
         String productId = lineReader.readLine("Enter the product ID :: ");
         Product product = inventoryManager.findProductById(Integer.parseInt(productId));
@@ -532,8 +549,8 @@ public class ConsoleUI {
             return;
         }
 
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s%n%n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
-        terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s%n",
+        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
+        terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
             product.getProductId(),
             product.getName(),
             "$" + product.getUnitPrice(),
@@ -550,10 +567,7 @@ public class ConsoleUI {
         clear();
         printTitle();
         
-        if(errorMessage != null) {
-            terminal.writer().println((new AttributedString(errorMessage, AttributedStyle.BOLD.foreground(AttributedStyle.RED))).toAnsi() + "\r");
-            terminal.writer().flush();
-        }
+        if(errorMessage != null) displayErrorMessage(errorMessage);
 
         String productName = lineReader.readLine("Enter the product name :: ");
         Product product = inventoryManager.findProductByName(productName);
@@ -562,8 +576,8 @@ public class ConsoleUI {
             return;
         }
 
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s%n%n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
-        terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s%n",
+        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
+        terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
             product.getProductId(),
             product.getName(),
             "$" + product.getUnitPrice(),
@@ -579,7 +593,6 @@ public class ConsoleUI {
     private void viewSaleDetailsById(String errorMessage) {
         clear();
         printTitle();
-
         if(errorMessage != null) displayErrorMessage(errorMessage);
 
         String saleId = lineReader.readLine("Enter the sale ID :: ");
@@ -593,9 +606,109 @@ public class ConsoleUI {
         waitForEnterKey();
     }
 
-    private void addUser() {
+    private void addUser(String errorMessage) {
+        clear();
+        printTitle();
 
+        if(errorMessage != null) displayErrorMessage(errorMessage);
+        
+        String name = lineReader.readLine("Enter the full name :: ");
+        if(name.isEmpty() || name.length() < 6) { addUser("Invalid user name, must be more than 6 characters"); return; }
+
+        String username = lineReader.readLine("Enter the username :: ");
+        if(username.isEmpty() || username.length() < 6) { addUser("Invalid user username, must be more than 6 characters"); return; }
+        if(usersManager.findUserByUsername(username) != null) { addUser("User already exists"); return; }
+        
+        String password = lineReader.readLine("Enter the password :: ", '*');
+        if(password.isEmpty() || password.length() < 6) { addUser("Invalid user password, must be more than 6 characters"); return; }
+        
+        String userType = lineReader.readLine("Choose a user type (Admin/Inventory/Marketing/Sales) :: ");
+        if(!userType.equals("Admin") && !userType.equals("Inventory") && !userType.equals("Marketing") && !userType.equals("Sales")) { addUser("Invalid user type"); return; }
+        
+        switch(userType) {
+            case "Admin":
+                usersManager.addUser(new Admin(name, username, password));
+                break;
+            case "Inventory":
+                usersManager.addUser(new Inventory(name, username, password));
+                break;
+            case "Marketing":
+                usersManager.addUser(new Marketing(name, username, password));
+                break;
+            case "Sales":
+                usersManager.addUser(new Sales(name, username, password));
+                break;
+        }
+
+        terminal.writer().println("User added successfully");
+        waitForEnterKey();
     }
 
-    private void deleteUser() {}
+    private void deleteUser(String errorMesage) {
+        clear();
+        printTitle();
+
+        if(errorMesage != null) displayErrorMessage(errorMesage);
+
+        String usernameorid = lineReader.readLine("Enter the username or id :: ");
+        User u;
+        if(isInteger(usernameorid)) u = usersManager.findUserById(Integer.parseInt(usernameorid));
+        else u = usersManager.findUserByUsername(usernameorid);
+        if(u == null) { deleteUser("User not found"); return; }
+
+        usersManager.removeUser(u);
+        terminal.writer().println("User deleted successfully");
+        waitForEnterKey();
+    }
+
+    private void addProduct(String errorMessage) {
+        clear();
+        printTitle();
+
+        if(errorMessage != null) displayErrorMessage(errorMessage);
+
+        String name = lineReader.readLine("Enter the product name :: ");
+        if(name.isEmpty() || name.length() < 6) { addProduct("Invalid product name, must be more than 6 characters"); return; }
+
+        String categoryStr = lineReader.readLine("Enter the product category (FOOD/DRINKS/ELECTRONICS/CLEANING/OTHER) :: ");
+        Category category;
+        try {
+            category = Category.valueOf(categoryStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            addProduct("Invalid product category. Must be FOOD, DRINKS, ELECTRONICS, CLEANING, or OTHER");
+            return;
+        }
+
+        String unitPrice = lineReader.readLine("Enter the product unit price :: ");
+        if(!isDouble(unitPrice)) { addProduct("Invalid product unit price"); return; }
+
+        String stockQuantity = lineReader.readLine("Enter the product stock quantity :: ");
+        if(!isInteger(stockQuantity)) { addProduct("Invalid product stock quantity"); return; }
+
+        String lowStockQuantityThreshold = lineReader.readLine("Enter the product low stock quantity threshold :: ");
+        if(!isInteger(lowStockQuantityThreshold)) { addProduct("Invalid product low stock quantity threshold"); return; }
+
+        String productType = lineReader.readLine("Enter the product type (Perishable/Non-Perishable) :: ");
+        
+        if(productType.equalsIgnoreCase("Perishable")) {
+            String expiryDate = lineReader.readLine("Enter the product expiry date (YYYY-MM-DD) :: ");
+            try {
+                LocalDate parsedDate = LocalDate.parse(expiryDate);
+                inventoryManager.addProduct(new PerishableProduct(name, category, Double.parseDouble(unitPrice), Integer.parseInt(stockQuantity), Integer.parseInt(lowStockQuantityThreshold), parsedDate));
+            } catch (DateTimeParseException e) {
+                addProduct("Invalid expiry date format. Use YYYY-MM-DD (e.g., 2025-12-31)");
+                return;
+            }
+        }
+        else if(productType.equalsIgnoreCase("Non-Perishable")) {
+            String warrantyMonths = lineReader.readLine("Enter the product warranty months :: ");
+            if(!isInteger(warrantyMonths)) { addProduct("Invalid product warranty months"); return; }
+            inventoryManager.addProduct(new NonPerishableProduct(name, category, Double.parseDouble(unitPrice), Integer.parseInt(stockQuantity), Integer.parseInt(lowStockQuantityThreshold), Integer.parseInt(warrantyMonths)));
+        } else { addProduct("Invalid product type. Must be Perishable or Non-Perishable"); return; }
+
+        terminal.writer().println("Product added successfully");
+        waitForEnterKey();
+    }
+
+    private void deleteProduct(String errorMessage) {}
 }

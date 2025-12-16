@@ -11,7 +11,7 @@ import product.*;
 import sales.*;
 import users.*;
 
-public final class FileManager {
+public class FileManager {
     private static final String productsFilePath = "data/products.csv";
     private static final String salesFilePath = "data/sales.csv";
     private static final String usersFilePath = "data/users.csv"; 

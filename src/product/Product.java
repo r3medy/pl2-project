@@ -3,7 +3,6 @@ package product;
 import java.util.List;
 import enums.*;
 
-// TODO: update product in file when a setter is called
 public abstract class Product {
     private static int idCounter = 0;
     private static boolean idCounterInitialized = false;
@@ -36,7 +35,7 @@ public abstract class Product {
         if(stockQuantity < 0) throw new IllegalArgumentException("Stock quantity cannot be negative");
         if(lowStockQuantityThreshold < 0) throw new IllegalArgumentException("Low stock quantity threshold cannot be negative");
 
-        if (productId > idCounter) idCounter = productId;
+        if(productId > idCounter) idCounter = productId;
 
         this.productId = productId;
         this.name = name;
