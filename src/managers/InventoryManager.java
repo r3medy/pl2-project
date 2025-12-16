@@ -43,7 +43,7 @@ public class InventoryManager {
 
     public Product findProductByName(String productName) {
         for(Product p : products) {
-            if(p.getName().equalsIgnoreCase(productName)) return p;
+            if(p.getName().toLowerCase().contains(productName.toLowerCase())) return p;
         }
         return null;
     }
@@ -135,5 +135,9 @@ public class InventoryManager {
             }
         }
         return productSales;
+    }
+
+    public int getProductSalesCount(int productId) {
+        return getAllProductSales().getOrDefault(productId, 0);
     }
 }

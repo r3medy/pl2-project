@@ -8,7 +8,6 @@ public class SalesReporter {
     private double totalRevenue;
     private Map<Category, Double> revenuePerCategory;
 
-
     public SalesReporter(int totalSalesCount, double totalRevenue, Map<Category, Double> revenuePerCategory) {
         this.totalSalesCount = totalSalesCount;
         this.totalRevenue = totalRevenue;

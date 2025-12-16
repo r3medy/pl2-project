@@ -34,3 +34,5 @@ id ,name                ,category    ,unitPrice ,stockQuantity ,lowStockQuantity
 33 ,Ballpoint Pen       ,OTHER       ,     0.50 ,          500 ,                      100 ,NON_PERISHABLE ,0
 34 ,Office Chair        ,OTHER       ,    89.99 ,           10 ,                        2 ,NON_PERISHABLE ,48
 35 ,Reusable Bottle     ,OTHER       ,    11.20 ,           60 ,                       10 ,NON_PERISHABLE ,0
+36, Pen                 ,OTHER       ,     0.50 ,            1 ,                      100 ,NON_PERISHABLE ,0    
+37, Test                ,FOOD        ,     0.50 ,            1 ,                      100 ,PERISHABLE     ,2025-12-18    

@@ -170,6 +170,13 @@ public final class FileManager {
         return sales;
     }
 
+    public static Sale findSaleById(int saleId) {
+        List<Sale> sales = loadSales();
+        for (Sale s : sales) {
+            if (s.getSaleId() == saleId) return s;
+        }
+        return null;
+    }
   
     public static Product parseProductLine(String line) {
         try {
