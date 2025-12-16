@@ -71,63 +71,6 @@ public class ConsoleUI {
         }
     }
 
-    // public void start() {
-    //     Runnable[] actions = {
-    //         null,
-    //         null,
-    //         null,
-    //         this::exit
-    //     };
-
-    //     String[][] subMenuTitles = {
-    //         {
-    //             "Add Product",
-    //             "View Products",
-    //             "Search Product",
-    //             "Back"
-    //         },
-    //         {
-    //             "New Sale",
-    //             "View Sales",
-    //             "Back"
-    //         },
-    //         {
-    //             "Low Stock Report",
-    //             "Sales Summary",
-    //             "Top Selling Products",
-    //             "Expired Products",
-    //             "Near Expiry Products",
-    //             "Back"
-    //         },
-    //         null
-    //     };
-
-    //     Runnable[][] subMenuActions = {
-    //         {
-    //             null,
-    //             null,
-    //             null,
-    //             null
-    //         },
-    //         {
-    //             null,
-    //             null,
-    //             null
-    //         },
-    //         {
-    //             null,
-    //             null,
-    //             null,
-    //             null,
-    //             null,
-    //             null
-    //         },
-    //         null
-    //     };
-
-    //     this.displayMenu(titles, actions, subMenuTitles, subMenuActions);
-    // }
-
     public void displayAdminMenu() {
         String[] titles = {
             "View Users",
@@ -137,10 +80,7 @@ public class ConsoleUI {
             "View Products",
             "Add Product",
             "Remove Product",
-            "────",
-            "View Discounts",
-            "Create Discount",
-            "Remove Discount",
+            "Set Product Discount",
             "────",
             "Logout",
             "Exit"
@@ -154,10 +94,7 @@ public class ConsoleUI {
             () -> this.viewProducts(),
             () -> this.addProduct(null),
             () -> this.deleteProduct(null),
-            null,
-            () -> this.viewDiscounts(),
-            null,
-            null,
+            () -> this.setProductDiscount(null),
             null,
             () -> this.start(null),
             this::exit
@@ -208,18 +145,16 @@ public class ConsoleUI {
     
     public void displayMarketingMenu() {
         String[] titles = {
-            "View Discounts",
-            "Create Discount",
-            "Remove Discount",
+            "View Products",
+            "Set Product Discount",
             "────",
             "Logout",
             "Exit"
         };
 
         Runnable[] actions = {
-            () -> this.viewDiscounts(),
-            null,
-            null,
+            () -> this.viewProducts(),
+            () -> this.setProductDiscount(null),
             null,
             () -> this.start(null),
             this::exit
@@ -234,6 +169,7 @@ public class ConsoleUI {
             "View Sale Details By ID",
             "New Sale",
             "────",
+            "Sales Summary",
             "View Top Selling Products",
             "View Least Selling Products",
             "────",
@@ -244,8 +180,9 @@ public class ConsoleUI {
         Runnable[] actions = {
             () -> this.viewSales(),
             () -> this.viewSaleDetailsById(null),
+            () -> this.newSale(null),
             null,
-            null,
+            () -> this.viewSalesSummary(),
             () -> this.viewLeastOrTopSellingProducts(10, true),
             () -> this.viewLeastOrTopSellingProducts(10, false),
             null,
@@ -388,12 +325,15 @@ public class ConsoleUI {
     private void viewProducts() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
+        terminal.writer().printf("%4s %25s %8s %20s %10s %12s %10s %20s\n\n", "ID", "Name", "Price", "Discount", "Stock Qty", "Category", "Low Stock?", "Expiry/Warranty");
         for(Product p : inventoryManager.getProducts()) {
-            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
+            terminal.writer().printf("%4d %25s %8s %20s %10s %12s %10s %20s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
+                (p.getDiscountStrategy() instanceof offers.BuyXGetYFree)
+                ? "Buy " + ((offers.BuyXGetYFree)p.getDiscountStrategy()).getBuyQuantity() + " Get " + ((offers.BuyXGetYFree)p.getDiscountStrategy()).getFreeQuantity() + " Free"
+                : "None",
                 p.getStockQuantity(),
                 p.getCategory(),
                 p.isLowStock() ? "Yes" : "No",
@@ -404,33 +344,12 @@ public class ConsoleUI {
         waitForEnterKey();
     }
 
-    private void viewDiscounts() {
-        clear();
-        printTitle();
-        terminal.writer().printf("%10s %15s %15s %15s %15s\n\n", "SaleID", "Date", "Subtotal", "Discount", "Total");
-        
-        List<Sale> sales = FileManager.loadSales();
-        for (Sale s : sales) {
-            if (s.getDiscountAmount() > 0) {
-                terminal.writer().printf("%10d %15s %15.2f$ %15.2f$ %15.2f$\n",
-                    s.getSaleId(),
-                    s.getSaleDate(),
-                    s.getSubTotal(),
-                    s.getDiscountAmount(),
-                    s.getTotalAmount()
-                );
-            }
-        }
-        
-        waitForEnterKey();
-    }
-
     private void viewNearExpiryProducts() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Near Expiry?", "Expiry Date");
+        terminal.writer().printf("%4s %25s %8s %10s %12s %12s %12s\n\n", "ID", "Name", "Price", "Stock Qty", "Category", "Near Expiry?", "Expiry Date");
         for(Product p : inventoryManager.listNearExpiryProducts()) {
-            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
+            terminal.writer().printf("%4d %25s %8s %10s %12s %12s %12s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -446,10 +365,10 @@ public class ConsoleUI {
     private void viewExpiredProducts() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Expired?", "Expiry Date");
+        terminal.writer().printf("%4s %25s %8s %10s %12s %10s %12s\n\n", "ID", "Name", "Price", "Stock Qty", "Category", "Expired?", "Expiry Date");
         for(Product p : inventoryManager.listExpiredProducts()) {
             if (!(p instanceof PerishableProduct)) continue;
-                terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
+                terminal.writer().printf("%4d %25s %8s %10s %12s %10s %12s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -465,10 +384,10 @@ public class ConsoleUI {
     private void viewLowStockProducts() {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?");
+        terminal.writer().printf("%4s %25s %8s %10s %12s %10s\n\n", "ID", "Name", "Price", "Stock Qty", "Category", "Low Stock?");
         for(Product p : inventoryManager.listLowStockProducts()) {
             if (!(p instanceof PerishableProduct)) continue;
-                terminal.writer().printf("%5d %20s %10s %15s %15s %5s\n",
+                terminal.writer().printf("%4d %25s %8s %10s %12s %10s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -483,9 +402,9 @@ public class ConsoleUI {
     private void viewProductsByCategory(Category category) {
         clear();
         printTitle();
-        terminal.writer().printf("%5s %20s %10s %15s %15s %5s %15s\n\n", "ID", "Name", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry Date/Warranty Months");
+        terminal.writer().printf("%4s %25s %8s %10s %12s %10s %20s\n\n", "ID", "Name", "Price", "Stock Qty", "Category", "Low Stock?", "Expiry/Warranty");
         for(Product p : inventoryManager.listProductsByCategory(category)) {
-            terminal.writer().printf("%5d %20s %10s %15s %15s %5s %15s\n",
+            terminal.writer().printf("%4d %25s %8s %10s %12s %10s %20s\n",
                 p.getProductId(),
                 p.getName(),
                 "$" + p.getUnitPrice(),
@@ -506,7 +425,7 @@ public class ConsoleUI {
             terminal.writer().printf("%10d %15s %15.2f$ %15.2f$ %15.2f$\n",
                 s.getSaleId(),
                 s.getSaleDate(),
-                s.getSubTotal(),
+                s.getTotal(),
                 s.getDiscountAmount(),
                 s.getTotalAmount()
             );
@@ -518,16 +437,19 @@ public class ConsoleUI {
         clear();
         printTitle();
         int ctr=0;
-        terminal.writer().printf("%5s %5s %20s %12s %10s %15s %15s %5s %15s\n\n", "No.", "ID", "Name", "Units Sold", "Price", "Stock Qty.", "Category", "Low Stock?", "Expiry/Warranty");
+        terminal.writer().printf("%4s %4s %25s %12s %10s %10s %20s %12s %10s %18s\n\n", "No.", "ID", "Name", "Units Sold", "Price", "Stock Qty", "Discount", "Category", "Low Stock?", "Expiry/Warranty");
         for(Product p : (isTop ? inventoryManager.listTopSellingProducts(limit) : inventoryManager.listLeastSellingProducts(limit))) {
             ctr++;
-            terminal.writer().printf("%5s %5d %20s %12d %10s %15s %15s %5s %15s\n",
+            terminal.writer().printf("%4s %4d %25s %12d %10s %10s %20s %12s %10s %18s\n",
                 ctr == 1 ? "1st" : ctr == 2 ? "2nd" : ctr == 3 ? "3rd" : ctr + "th",
                 p.getProductId(),
                 p.getName(),
                 inventoryManager.getProductSalesCount(p.getProductId()),
                 "$" + p.getUnitPrice(),
                 p.getStockQuantity(),
+                (p.getDiscountStrategy() instanceof offers.BuyXGetYFree)
+                ? "Buy " + ((offers.BuyXGetYFree)p.getDiscountStrategy()).getBuyQuantity() + " Get " + ((offers.BuyXGetYFree)p.getDiscountStrategy()).getFreeQuantity() + " Free"
+                : "None",
                 p.getCategory(),
                 p.isLowStock() ? "Yes" : "No",
                 (p instanceof PerishableProduct) ? ((PerishableProduct) p).getExpiryDate() : ((NonPerishableProduct) p).getWarrantyMonths() + " Months"
@@ -722,6 +644,170 @@ public class ConsoleUI {
 
         inventoryManager.removeProduct(p);
         terminal.writer().println("Product deleted successfully");
+        waitForEnterKey();
+    }
+
+    private void setProductDiscount(String errorMessage) {
+        clear();
+        printTitle();
+
+        if(errorMessage != null) displayErrorMessage(errorMessage);
+
+        String productId = lineReader.readLine("Enter the product ID :: ");
+        if(!isInteger(productId)) { setProductDiscount("Invalid product ID"); return; }
+        
+        Product p = inventoryManager.findProductById(Integer.parseInt(productId));
+        if(p == null) { setProductDiscount("Product not found"); return; }
+
+        terminal.writer().println("\nProduct: " + p.getName() + " (ID: " + p.getProductId() + ")");
+        terminal.writer().println("Current discount: " + p.getDiscountStrategy().getDiscountStrategy());
+        terminal.writer().flush();
+
+        String discountType = lineReader.readLine("\nEnter discount type (None/BuyXGetYFree) :: ");
+        
+        if(discountType.equalsIgnoreCase("None")) {
+            p.setDiscountStrategy(new offers.NoDiscount());
+            inventoryManager.saveProducts();
+            terminal.writer().println("Discount removed successfully");
+        } else if(discountType.equalsIgnoreCase("BuyXGetYFree")) {
+            String buyQty = lineReader.readLine("Enter buy quantity (X) :: ");
+            if(!isInteger(buyQty) || Integer.parseInt(buyQty) <= 0) { setProductDiscount("Invalid buy quantity"); return; }
+            
+            String freeQty = lineReader.readLine("Enter free quantity (Y) :: ");
+            if(!isInteger(freeQty) || Integer.parseInt(freeQty) <= 0) { setProductDiscount("Invalid free quantity"); return; }
+            
+            p.setDiscountStrategy(new offers.BuyXGetYFree(Integer.parseInt(buyQty), Integer.parseInt(freeQty)));
+            inventoryManager.saveProducts();
+            terminal.writer().println("Discount set successfully: Buy " + buyQty + " Get " + freeQty + " Free");
+        } else {
+            setProductDiscount("Invalid discount type. Must be None or BuyXGetYFree");
+            return;
+        }
+
+        waitForEnterKey();
+    }
+
+    private void newSale(String errorMessage) {
+        clear();
+        printTitle();
+
+        if(errorMessage != null) displayErrorMessage(errorMessage);
+
+        sales.Sale sale = new sales.Sale();
+        terminal.writer().println("=== New Sale ===");
+        terminal.writer().println("Type 'done' when finished adding items.\n");
+        terminal.writer().flush();
+
+        while(true) {
+            String productIdStr = lineReader.readLine("Enter product ID (or 'done') :: ");
+            
+            if(productIdStr.equalsIgnoreCase("done")) {
+                if(sale.getSaleItems().isEmpty()) {
+                    terminal.writer().println("No items added. Sale cancelled.");
+                    waitForEnterKey();
+                    return;
+                }
+                break;
+            }
+
+            if(!isInteger(productIdStr)) {
+                displayErrorMessage("Invalid product ID");
+                continue;
+            }
+
+            Product p = inventoryManager.findProductById(Integer.parseInt(productIdStr));
+            if(p == null) {
+                displayErrorMessage("Product not found");
+                continue;
+            }
+
+            String qtyStr = lineReader.readLine("Enter quantity for '" + p.getName() + "' :: ");
+            if(!isInteger(qtyStr) || Integer.parseInt(qtyStr) <= 0) {
+                displayErrorMessage("Invalid quantity");
+                continue;
+            }
+
+            int qty = Integer.parseInt(qtyStr);
+            if(p.getStockQuantity() < qty) {
+                displayErrorMessage("Insufficient stock. Available: " + p.getStockQuantity());
+                continue;
+            }
+
+            sale.addSaleItem(new sales.SaleItem(p, qty));
+            terminal.writer().printf("Added: %s x%d = $%.2f\n", p.getName(), qty, p.getUnitPrice() * qty);
+            terminal.writer().printf("Running total: $%.2f\n\n", sale.getTotalAmount());
+            terminal.writer().flush();
+        }
+
+        terminal.writer().printf("\nSubtotal: $%.2f\n", sale.getTotal());
+        terminal.writer().flush();
+        String discountChoice = lineReader.readLine("Apply percentage discount? (yes/no) :: ");
+        
+        if(discountChoice.equalsIgnoreCase("yes")) {
+            String percentStr = lineReader.readLine("Enter discount percentage ( eg. 10 for 10% ) :: ");
+            if(isDouble(percentStr) || isInteger(percentStr)) {
+                double percent = Double.parseDouble(percentStr);
+                if(percent > 0 && percent <= 100) {
+                    sale.setDiscountStrategy(new offers.PercentageDiscount(percent));
+                    terminal.writer().printf("Applied %.1f%% discount!\n", percent);
+                } else {
+                    terminal.writer().println("Invalid percentage. No discount applied.");
+                }
+            } else {
+                terminal.writer().println("Invalid input. No discount applied.");
+            }
+        }
+
+        terminal.writer().println("\n ─ Processing Sale");
+        terminal.writer().flush();
+        sale.processSale();
+
+        waitForEnterKey();
+    }
+
+    private void viewSalesSummary() {
+        clear();
+        printTitle();
+
+        List<Sale> sales = FileManager.loadSales();
+        
+        if(sales.isEmpty()) {
+            terminal.writer().println("No sales data available.");
+            waitForEnterKey();
+            return;
+        }
+
+        int totalSalesCount = sales.size();
+        double totalRevenue = 0;
+        java.util.Map<Category, Double> revenuePerCategory = new java.util.HashMap<>();
+
+        for(Sale s : sales) {
+            totalRevenue += s.getTotalAmount();
+            for(sales.SaleItem item : s.getSaleItems()) {
+                if(item.getProduct() != null) {
+                    enums.Category cat = item.getProduct().getCategory();
+                    revenuePerCategory.put(cat, revenuePerCategory.getOrDefault(cat, 0.0) + item.getSaleTotalPrice());
+                }
+            }
+        }
+
+        SalesReporter reporter = new SalesReporter(totalSalesCount, totalRevenue, revenuePerCategory);
+
+        terminal.writer().printf("Total Sales: %d\n", reporter.getTotalSalesCount());
+        terminal.writer().printf("Total Revenue: $%.2f\n", reporter.getTotalRevenue());
+        terminal.writer().printf("Average Sale Value: $%.2f\n", reporter.getAverageSalesValue());
+        
+        terminal.writer().println("\n ─ Revenue by Category ");
+        for(java.util.Map.Entry<Category, Double> entry : reporter.getRevenuePerCategory().entrySet()) {
+            terminal.writer().printf("  %s: $%.2f\n", entry.getKey(), entry.getValue());
+        }
+
+        Category bestCategory = reporter.findBestSellingCategory();
+        if(bestCategory != null) {
+            terminal.writer().printf("\nBest Selling Category: %s\n", bestCategory);
+        }
+
+        terminal.writer().flush();
         waitForEnterKey();
     }
 }

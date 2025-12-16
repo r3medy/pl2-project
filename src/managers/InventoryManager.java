@@ -125,6 +125,10 @@ public class InventoryManager {
         return new ArrayList<>(sales);
     }
 
+    public boolean saveProducts() {
+        return FileManager.saveProducts(products);
+    }
+
     private Map<Integer, Integer> getAllProductSales() {
         Map<Integer, Integer> productSales = new HashMap<>();
         if(this.sales == null) return productSales;

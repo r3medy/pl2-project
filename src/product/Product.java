@@ -67,12 +67,11 @@ public abstract class Product {
     public DiscountStrategy getDiscountStrategy() {
         return discountStrategy;
     }
-    public void setDiscountStrategy(DiscountStrategy discountStrategy) {
-        this.discountStrategy = (discountStrategy == null) ? new NoDiscount() : discountStrategy;
-    }
+    
     public boolean isDiscountEligible() {
         return discountStrategy.isActive();
     }
+    
     public double getDiscountedUnitPrice() {
         double discount = discountStrategy.applyDiscount(unitPrice);
         return unitPrice - discount;
@@ -97,9 +96,11 @@ public abstract class Product {
     public int getStockQuantity() { return stockQuantity; }
     public Category getCategory() { return category; }
     public int getLowStockQuantityThreshold() { return lowStockQuantityThreshold; }
-
     public abstract String getProductType();
 
+    public void setDiscountStrategy(DiscountStrategy discountStrategy) {
+        this.discountStrategy = (discountStrategy == null) ? new NoDiscount() : discountStrategy;
+    }
 
     public void setName(String name) {
         if(name == null || name.trim().isEmpty()) throw new IllegalArgumentException("Product name cannot be empty");

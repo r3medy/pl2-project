@@ -22,4 +22,7 @@ public class BuyXGetYFree implements DiscountStrategy {
     public DiscountStrategies getDiscountStrategy() {
         return DiscountStrategies.BUY_X_GET_Y_FREE;
     }
+
+    public int getBuyQuantity() { return buyQuantity; }
+    public int getFreeQuantity() { return freeQuantity; }
 }

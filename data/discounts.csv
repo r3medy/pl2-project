@@ -1,4 +1,0 @@
-productId, discountType , discountAmount
-5        , Percentage   , 10 
-7        , ByXGetYFree  , 1:5
-12       , NoDiscount   , 0

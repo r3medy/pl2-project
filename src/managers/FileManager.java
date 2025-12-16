@@ -21,16 +21,17 @@ public class FileManager {
     public static boolean saveProducts(List<Product> products) {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(productsFilePath))) {
             for (Product p : products) {
+                String discountData = serializeDiscount(p.getDiscountStrategy());
                 if (p instanceof PerishableProduct) {
                     PerishableProduct pp = (PerishableProduct) p;
                     writer.write(p.getProductId() + "," + p.getName() + "," + p.getCategory() + "," +
                                  p.getUnitPrice() + "," + p.getStockQuantity() + "," +
-                                 p.getLowStockQuantityThreshold() + ",PERISHABLE," + pp.getExpiryDate());
+                                 p.getLowStockQuantityThreshold() + ",PERISHABLE," + pp.getExpiryDate() + "," + discountData);
                 } else if (p instanceof NonPerishableProduct) {
                     NonPerishableProduct np = (NonPerishableProduct) p;
                     writer.write(p.getProductId() + "," + p.getName() + "," + p.getCategory() + "," +
                                  p.getUnitPrice() + "," + p.getStockQuantity() + "," +
-                                 p.getLowStockQuantityThreshold() + ",NON_PERISHABLE," + np.getWarrantyMonths());
+                                 p.getLowStockQuantityThreshold() + ",NON_PERISHABLE," + np.getWarrantyMonths() + "," + discountData);
                 }
                 writer.newLine();
             }
@@ -116,7 +117,7 @@ public class FileManager {
                     }
                 }
                 writer.write(s.getSaleId() + "," + s.getSaleDate() + "," +
-                     s.getSubTotal() + "," + s.getDiscountAmount() + "," + s.getTotalAmount() + "," + itemsStr);
+                     s.getTotal() + "," + s.getDiscountAmount() + "," + s.getTotalAmount() + "," + itemsStr);
                 writer.newLine();
             }
             return true;
@@ -191,16 +192,46 @@ public class FileManager {
             int lowStockQuantityThreshold = Integer.parseInt(parts[5].trim());
             String type = parts[6].trim();
 
+            Product product;
             if (ProductType.PERISHABLE.name().equalsIgnoreCase(type)) {
                 LocalDate expiry = LocalDate.parse(parts[7].trim());
-                return new PerishableProduct(id, name, category, unitPrice, stock, lowStockQuantityThreshold, expiry);
+                product = new PerishableProduct(id, name, category, unitPrice, stock, lowStockQuantityThreshold, expiry);
             } else {
                 int warrantyMonths = Integer.parseInt(parts[7].trim());
-                return new NonPerishableProduct(id, name, category, unitPrice, stock, lowStockQuantityThreshold, warrantyMonths);
+                product = new NonPerishableProduct(id, name, category, unitPrice, stock, lowStockQuantityThreshold, warrantyMonths);
             }
+
+            if (parts.length > 8) {
+                String discountType = parts[8].trim();
+                String discountParams = parts.length > 9 ? parts[9].trim() : "";
+                DiscountStrategy discount = parseDiscount(discountType, discountParams);
+                product.setDiscountStrategy(discount);
+            }
+
+            return product;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private static String serializeDiscount(DiscountStrategy discountStrat) {
+        if (discountStrat instanceof BuyXGetYFree) {
+            BuyXGetYFree bxgyf = (BuyXGetYFree) discountStrat;
+            return "BUY_X_GET_Y_FREE," + bxgyf.getBuyQuantity() + ":" + bxgyf.getFreeQuantity();
+        }
+        return "NONE,";
+    }
+
+    private static DiscountStrategy parseDiscount(String type, String params) {
+        if ("BUY_X_GET_Y_FREE".equalsIgnoreCase(type) && !params.isEmpty()) {
+            String[] qtyParts = params.split(":");
+            if (qtyParts.length == 2) {
+                int buyQty = Integer.parseInt(qtyParts[0].trim());
+                int freeQty = Integer.parseInt(qtyParts[1].trim());
+                return new BuyXGetYFree(buyQty, freeQty);
+            }
+        }
+        return new NoDiscount();
     }
 }
