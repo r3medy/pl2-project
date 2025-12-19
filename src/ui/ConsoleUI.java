@@ -116,11 +116,7 @@ public class ConsoleUI {
             "View Expired Products",
             "View Low Stock Products",
             "────",
-            "View Foods",
-            "View Drinks",
-            "View Electronics",
-            "View Cleaning Products",
-            "View Other Products",
+            "View Products by Category",
             "────",
             "Logout",
             "Exit"
@@ -133,18 +129,56 @@ public class ConsoleUI {
             () -> this.viewNearExpiryProducts(),
             () -> this.viewExpiredProducts(),
             () -> this.viewLowStockProducts(),
-            null, 
-            () -> this.viewProductsByCategory(Category.FOOD),
-            () -> this.viewProductsByCategory(Category.DRINKS),
-            () -> this.viewProductsByCategory(Category.ELECTRONICS),
-            () -> this.viewProductsByCategory(Category.CLEANING),
-            () -> this.viewProductsByCategory(Category.OTHER),
+            null,
+            null,
             null,
             () -> this.start(null),
             () -> this.exit()
         };
 
-        this.displayMenu(titles, actions, null, null);
+        String[][] subMenuTitles = {
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {
+                "View Foods",
+                "View Drinks",
+                "View Electronics",
+                "View Cleaning Products",
+                "View Other Products",
+                "Back"
+            },
+            null,
+            null,
+            null
+        };
+
+        Runnable[][] subMenuActions = {
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {
+                () -> this.viewProductsByCategory(Category.FOOD),
+                () -> this.viewProductsByCategory(Category.DRINKS),
+                () -> this.viewProductsByCategory(Category.ELECTRONICS),
+                () -> this.viewProductsByCategory(Category.CLEANING),
+                () -> this.viewProductsByCategory(Category.OTHER),
+                null
+            },
+            null,
+            null,
+            null
+        };
+
+        this.displayMenu(titles, actions, subMenuTitles, subMenuActions);
     }
     
     public void displayMarketingMenu() {
