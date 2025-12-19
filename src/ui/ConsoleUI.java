@@ -673,6 +673,8 @@ public class ConsoleUI {
         if(errorMessage != null) displayErrorMessage(errorMessage);
 
         String productId = lineReader.readLine("Enter the product ID :: ");
+        if(productId.isEmpty()) { deleteProduct("Product ID cannot be empty"); return; }
+        if(!isInteger(productId)) { deleteProduct("Invalid product ID"); return; }
         Product p = inventoryManager.findProductById(Integer.parseInt(productId));
         if(p == null) { deleteProduct("Product not found"); return; }
 
@@ -808,13 +810,11 @@ public class ConsoleUI {
         
         terminal.writer().println("\n ─ Revenue by Category ");
         for(Map.Entry<Category, Double> entry : reporter.getRevenuePerCategory().entrySet()) {
-            terminal.writer().printf("  %s: $%.2f\n", entry.getKey(), entry.getValue());
+            terminal.writer().printf("%s: $%.2f\n", entry.getKey(), entry.getValue());
         }
 
         Category bestCategory = reporter.findBestSellingCategory();
-        if(bestCategory != null) {
-            terminal.writer().printf("\nBest Selling Category: %s\n", bestCategory);
-        }
+        if(bestCategory != null) terminal.writer().printf("\nBest Selling Category: %s\n", bestCategory);
 
         terminal.writer().flush();
         waitForEnterKey();
